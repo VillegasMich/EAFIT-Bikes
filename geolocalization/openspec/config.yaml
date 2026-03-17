@@ -1,0 +1,19 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+rules:
+  tasks:
+    - Always include a final task to update documentation. This task must review
+      whether the change affects any API endpoints, request/response shapes,
+      status codes, validation rules, environment variables, or architectural
+      decisions, and update README.md and CLAUDE.md accordingly.

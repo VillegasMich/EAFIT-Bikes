@@ -182,7 +182,7 @@ Removes the location entry for a bicycle (e.g., when a bicycle is decommissioned
 
 ## Running Locally
 
-**Requirements:** Docker, Docker Compose
+**Prerequisites:** Docker, Docker Compose (or Rust 1.83+ for native development)
 
 ```bash
 git clone https://github.com/your-org/geolocalization.git
@@ -192,6 +192,13 @@ docker compose up --build
 ```
 
 The API will be available at `http://localhost:8080`.
+
+**Verify it's running:**
+
+```bash
+curl http://localhost:8080/health
+# {"status":"ok","db":"connected"}
+```
 
 ---
 

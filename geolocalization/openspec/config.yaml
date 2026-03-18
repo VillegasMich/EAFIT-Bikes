@@ -17,3 +17,8 @@ rules:
       whether the change affects any API endpoints, request/response shapes,
       status codes, validation rules, environment variables, or architectural
       decisions, and update README.md and CLAUDE.md accordingly.
+    - If the change adds or modifies an API endpoint, include a task to create
+      or update the corresponding documentation file in docs/. Each endpoint
+      must have its own Markdown file (e.g. docs/health.md, docs/locations.md)
+      documenting the method, path, request/response shapes, status codes, and
+      any relevant notes.

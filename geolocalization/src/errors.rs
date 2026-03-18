@@ -14,6 +14,7 @@ impl IntoResponse for AppError {
                 (StatusCode::SERVICE_UNAVAILABLE, "database unavailable")
             }
         };
+        tracing::error!(status = %status, error = message, "Request error");
         let body = axum::Json(json!({ "error": message }));
         (status, body).into_response()
     }

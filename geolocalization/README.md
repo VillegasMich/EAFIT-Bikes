@@ -221,3 +221,4 @@ curl http://localhost:8080/health
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@db:5432/geolocalization` |
 | `APP_PORT` | Port the service listens on | `8080` |
+| `RUST_LOG` | Log level filter (default: `error`) | `info`, `geolocalization=debug` |

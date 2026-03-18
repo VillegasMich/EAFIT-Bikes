@@ -17,6 +17,8 @@ async fn health_check(State(state): State<AppState>) -> Json<HealthResponse> {
     }
     .to_string();
 
+    tracing::info!(db_status = %db, "GET /health");
+
     Json(HealthResponse {
         status: "ok".to_string(),
         db,

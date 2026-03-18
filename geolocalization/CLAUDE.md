@@ -80,9 +80,26 @@ After every code change:
 
 If an API endpoint, request/response shape, status code, or validation rule changes, update the **API Contract** section in this file to match. The README.md must also stay in sync with any such changes.
 
+## Logging
+
+The service uses the `tracing` crate for structured logging, controlled by the `RUST_LOG` environment variable. The default level is `error` (quiet).
+
+**All code must use `tracing` macros** (`error!`, `warn!`, `info!`, `debug!`, `trace!`) — never `println!()` or `eprintln!()`.
+
+| Level | Use for |
+|-------|---------|
+| `error!` | Unrecoverable failures (migration failure, bind failure) |
+| `warn!` | Degraded state (DB unavailable, skipped migrations) |
+| `info!` | Lifecycle events (server started, migrations applied, shutdown) |
+| `debug!` | Per-request details, query results |
+| `trace!` | Fine-grained internal state |
+
+When adding new endpoints or features, include appropriate log events at the levels above.
+
 ## Environment Variables
 
 | Variable | Example |
 |----------|---------|
 | `DATABASE_URL` | `postgres://user:pass@db:5432/geolocalization` |
 | `APP_PORT` | `8080` |
+| `RUST_LOG` | `error` (default), `info`, `geolocalization=debug` |

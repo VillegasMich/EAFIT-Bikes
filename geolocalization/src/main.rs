@@ -6,26 +6,34 @@ mod state;
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use tokio::net::TcpListener;
+use tracing::{error, info, warn};
+use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("error")),
+        )
+        .init();
 
     let port = std::env::var("APP_PORT").unwrap_or_else(|_| "8080".to_string());
 
     let pool = match std::env::var("DATABASE_URL") {
         Ok(url) => match PgPoolOptions::new().max_connections(5).connect(&url).await {
             Ok(p) => {
-                eprintln!("Connected to database");
+                info!("Connected to database");
                 Some(p)
             }
             Err(e) => {
-                eprintln!("Warning: could not connect to database: {e}");
+                warn!("Could not connect to database: {e}");
                 None
             }
         },
         Err(_) => {
-            eprintln!("Warning: DATABASE_URL not set, starting without database");
+            warn!("DATABASE_URL not set, starting without database");
             None
         }
     };
@@ -33,16 +41,16 @@ async fn main() {
     let pool = if let Some(p) = pool {
         match sqlx::migrate!().run(&p).await {
             Ok(_) => {
-                eprintln!("Migrations applied successfully");
+                info!("Migrations applied successfully");
                 Some(p)
             }
             Err(e) => {
-                eprintln!("Error: migration failed: {e}");
+                error!("Migration failed: {e}");
                 None
             }
         }
     } else {
-        eprintln!("Warning: skipping migrations (no database connection)");
+        warn!("Skipping migrations (no database connection)");
         None
     };
 
@@ -50,7 +58,7 @@ async fn main() {
     let app = router::build(state);
 
     let addr = format!("0.0.0.0:{port}");
-    eprintln!("Listening on {addr}");
+    info!("Listening on {addr}");
     let listener = TcpListener::bind(&addr)
         .await
         .expect("failed to bind address");
@@ -79,7 +87,7 @@ async fn shutdown_signal() {
     let terminate = std::future::pending::<()>();
 
     tokio::select! {
-        _ = ctrl_c => eprintln!("\nReceived SIGINT, shutting down..."),
-        _ = terminate => eprintln!("\nReceived SIGTERM, shutting down..."),
+        _ = ctrl_c => info!("Received SIGINT, shutting down..."),
+        _ = terminate => info!("Received SIGTERM, shutting down..."),
     }
 }

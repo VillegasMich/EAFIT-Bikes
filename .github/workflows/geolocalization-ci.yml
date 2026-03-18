@@ -1,12 +1,18 @@
-name: CI
+name: "CI: Geolocalization"
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+    paths:
+      - "geolocalization/**"
 
 env:
   CARGO_TERM_COLOR: always
+
+defaults:
+  run:
+    working-directory: geolocalization
 
 jobs:
   lint:
@@ -20,6 +26,8 @@ jobs:
           components: rustfmt, clippy
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: geolocalization
 
       - name: Check formatting
         run: cargo fmt --check
@@ -40,6 +48,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: geolocalization
 
       - name: Build release
         run: cargo build --release
@@ -70,6 +80,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: geolocalization
 
       - name: Run tests
         run: cargo test

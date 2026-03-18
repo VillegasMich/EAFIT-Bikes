@@ -15,6 +15,7 @@ A lightweight microservice responsible for storing and serving real-time geoloca
 - [Acceptance Criteria](#acceptance-criteria)
 - [CI Pipeline](#ci-pipeline)
 - [Running Locally](#running-locally)
+- [Database UI (pgAdmin)](#database-ui-pgadmin)
 
 ---
 
@@ -212,6 +213,35 @@ The API will be available at `http://localhost:8080`.
 curl http://localhost:8080/health
 # {"status":"ok","db":"connected"}
 ```
+
+---
+
+## Database UI (pgAdmin)
+
+The Docker Compose stack includes a **pgAdmin** container for browsing and managing the PostgreSQL database through a web interface.
+
+After running `docker compose up`, open your browser at:
+
+```
+http://localhost:5050
+```
+
+**Login credentials:**
+
+| Field | Value |
+|-------|-------|
+| Email | `admin@admin.com` |
+| Password | `admin` |
+
+**Connecting to the database:** Once logged in, register a new server with these settings:
+
+| Field | Value |
+|-------|-------|
+| Host | `db` |
+| Port | `5432` |
+| Username | `user` |
+| Password | `pass` |
+| Database | `geolocalization` |
 
 ---
 

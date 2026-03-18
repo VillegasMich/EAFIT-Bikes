@@ -13,6 +13,7 @@ A lightweight microservice responsible for storing and serving real-time geoloca
 - [Database Schema](#database-schema)
 - [API Endpoints](#api-endpoints)
 - [Acceptance Criteria](#acceptance-criteria)
+- [CI Pipeline](#ci-pipeline)
 - [Running Locally](#running-locally)
 
 ---
@@ -177,6 +178,18 @@ Removes the location entry for a bicycle (e.g., when a bicycle is decommissioned
 
 ### AC-08 — Containerized deployment
 - The service and database must run via `docker compose up` with no additional configuration required beyond environment variables.
+
+---
+
+## CI Pipeline
+
+A GitHub Actions workflow runs automatically on every pull request to `main`. It enforces three stages in order:
+
+1. **Lint & Format** — `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo check`
+2. **Build** — `cargo build --release`
+3. **Test** — `cargo test` (with a PostGIS service container)
+
+If any stage fails, subsequent stages are skipped.
 
 ---
 

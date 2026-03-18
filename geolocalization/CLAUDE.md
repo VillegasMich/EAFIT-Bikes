@@ -27,6 +27,15 @@ docker compose up --build
 
 The API is served at `http://localhost:8080`. Requires a `.env` file (copy from `.env.example`).
 
+## Architecture Decision Records
+
+Key architectural decisions are documented in the `adr/` directory. Always consult these before proposing changes to the technology stack or database:
+
+- [`adr/ADR-01-rust-axum.md`](adr/ADR-01-rust-axum.md) — Why Rust + Axum were chosen as the service language and framework.
+- [`adr/ADR-02-postgresql-postgis.md`](adr/ADR-02-postgresql-postgis.md) — Why PostgreSQL + PostGIS were chosen as the database.
+
+Do not suggest replacing or adding technologies covered by these ADRs without explicitly noting the conflict with the recorded decision.
+
 ## Stack
 
 - **Rust** with **Axum** (HTTP framework) on the **Tokio** async runtime

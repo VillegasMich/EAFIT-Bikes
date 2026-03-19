@@ -52,18 +52,22 @@ The entire stack is containerized. Docker ensures environment reproducibility ac
 
 ```sql
 CREATE TABLE bicycles_location (
-    id           UUID PRIMARY KEY,
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    bicycle_id   UUID NOT NULL,
     location     GEOGRAPHY(POINT, 4326) NOT NULL,
     updated_at   TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE INDEX idx_bicycles_location_geo
     ON bicycles_location USING GIST(location);
+CREATE INDEX idx_bicycles_location_bicycle_id
+    ON bicycles_location (bicycle_id);
 ```
 
-- `id` — matches the bicycle ID from the Bicycles microservice
+- `id` — auto-generated row primary key
+- `bicycle_id` — matches the bicycle ID from the Bicycles microservice
 - `location` — geographic point (longitude, latitude) in WGS84
-- `updated_at` — timestamp of the last position update
+- `updated_at` — timestamp of the position update
 
 ---
 
@@ -242,6 +246,22 @@ http://localhost:5050
 | Username | `user` |
 | Password | `pass` |
 | Database | `geolocalization` |
+
+---
+
+## Seed Data
+
+The project includes a seed binary that populates the database with realistic test data — multiple bicycles with GPS routes near the EAFIT campus.
+
+```bash
+# Database must be running first
+docker compose up -d db
+
+# Run the seed binary
+cargo run --bin seed
+```
+
+The seed binary is idempotent — re-running it resets seed data without creating duplicates. It inserts 4 bicycles, each with ~15 timestamped positions simulating movement.
 
 ---
 

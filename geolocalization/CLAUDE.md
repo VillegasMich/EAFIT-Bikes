@@ -23,6 +23,9 @@ cargo fmt
 
 # Run the full stack (service + PostgreSQL/PostGIS)
 docker compose up --build
+
+# Seed database with test data (requires DB running)
+cargo run --bin seed
 ```
 
 The API is served at `http://localhost:8080`. Requires a `.env` file (copy from `.env.example`).
@@ -49,12 +52,16 @@ Single table:
 
 ```sql
 CREATE TABLE bicycles_location (
-    id         UUID PRIMARY KEY,      -- matches ID from Bicycles microservice
-    location   GEOGRAPHY(POINT, 4326) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT now()
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    bicycle_id  UUID NOT NULL,         -- matches ID from Bicycles microservice
+    location    GEOGRAPHY(POINT, 4326) NOT NULL,
+    updated_at  TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX idx_bicycles_location_geo ON bicycles_location USING GIST(location);
+CREATE INDEX idx_bicycles_location_bicycle_id ON bicycles_location (bicycle_id);
 ```
+
+Each bicycle can have multiple location rows (movement history). `bicycle_id` links to the Bicycles microservice; `id` is the auto-generated row primary key.
 
 PostGIS stores points as `(longitude, latitude)` internally. The API response serializes them as separate `latitude`/`longitude` fields.
 

@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
+#[allow(dead_code)]
 #[derive(Debug, sqlx::FromRow)]
 pub struct BicycleLocation {
     pub id: Uuid,

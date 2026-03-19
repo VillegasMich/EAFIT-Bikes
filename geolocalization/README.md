@@ -263,6 +263,16 @@ cargo run --bin seed
 
 The seed binary is idempotent — re-running it resets seed data without creating duplicates. It inserts 4 bicycles, each with ~15 timestamped positions simulating movement.
 
+### Live Ingestor Mode
+
+The seed binary also supports a `--live` flag that enters a continuous ingestor mode. In this mode, it inserts a new location row for each bicycle every second, advancing them along their predefined routes. Routes loop indefinitely, so bicycles appear to move continuously until the process is stopped with Ctrl+C.
+
+```bash
+cargo run --bin seed -- --live
+```
+
+Set `RUST_LOG=debug` to see per-tick insertion logs.
+
 ---
 
 ## Environment Variables

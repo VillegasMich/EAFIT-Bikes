@@ -1,8 +1,25 @@
+use std::time::Instant;
+
 use chrono::{Duration, Utc};
+use clap::Parser;
+use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
+
+/// Seed binary for the geolocalization microservice.
+///
+/// By default, performs a one-shot seed of static bicycle location data.
+/// With `--live`, enters a continuous ingestor mode that inserts new positions
+/// every second to simulate real-time bicycle movement.
+#[derive(Parser)]
+#[command(name = "seed")]
+struct Cli {
+    /// Run in live ingestor mode: continuously insert positions every second
+    #[arg(long)]
+    live: bool,
+}
 
 /// Fixed seed UUIDs following the `00000000-0000-4000-a000-*` pattern.
 const SEED_UUIDS: [&str; 4] = [
@@ -98,6 +115,149 @@ fn interpolate_route(waypoints: &[(f64, f64)], min_points: usize) -> Vec<(f64, f
     positions
 }
 
+/// One-shot seed: insert static location data for all bicycles.
+async fn run_seed(pool: &PgPool) {
+    let seed_ids: Vec<Uuid> = SEED_UUIDS
+        .iter()
+        .map(|s| s.parse::<Uuid>().expect("invalid seed UUID"))
+        .collect();
+
+    let all_routes = routes();
+    let base_time = Utc::now();
+    let mut total_positions: usize = 0;
+
+    for (i, (id, waypoints)) in seed_ids.iter().zip(all_routes.iter()).enumerate() {
+        let positions = interpolate_route(waypoints, 15);
+        let bike_num = i + 1;
+
+        info!(
+            "Seeding bicycle {bike_num}/{} (id: {id}) with {} positions",
+            seed_ids.len(),
+            positions.len()
+        );
+
+        // Delete existing rows for idempotency
+        sqlx::query("DELETE FROM bicycles_location WHERE bicycle_id = $1")
+            .bind(id)
+            .execute(pool)
+            .await
+            .unwrap_or_else(|e| {
+                error!("Failed to delete existing rows for {id}: {e}");
+                std::process::exit(1);
+            });
+
+        // Insert positions
+        for (j, (lat, lon)) in positions.iter().enumerate() {
+            let updated_at = base_time + Duration::seconds(30 * j as i64);
+
+            sqlx::query(
+                "INSERT INTO bicycles_location (bicycle_id, location, updated_at) \
+                 VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4)",
+            )
+            .bind(id)
+            .bind(lon) // PostGIS: MakePoint(lon, lat)
+            .bind(lat)
+            .bind(updated_at)
+            .execute(pool)
+            .await
+            .unwrap_or_else(|e| {
+                error!(
+                    "Failed to insert position {}/{} for bicycle {id}: {e}",
+                    j + 1,
+                    positions.len()
+                );
+                std::process::exit(1);
+            });
+        }
+
+        total_positions += positions.len();
+        info!(
+            "  ✓ Bicycle {bike_num} seeded with {} positions",
+            positions.len()
+        );
+    }
+
+    info!(
+        "Seed complete: {} bicycles, {} total positions",
+        seed_ids.len(),
+        total_positions
+    );
+}
+
+/// Live ingestor: continuously insert positions every second to simulate movement.
+async fn run_live(pool: &PgPool) {
+    let seed_ids: Vec<Uuid> = SEED_UUIDS
+        .iter()
+        .map(|s| s.parse::<Uuid>().expect("invalid seed UUID"))
+        .collect();
+
+    let all_routes = routes();
+    let interpolated: Vec<Vec<(f64, f64)>> = all_routes
+        .iter()
+        .map(|r| interpolate_route(r, 15))
+        .collect();
+
+    info!(
+        "Live ingestor started: {} bicycles, route lengths: {:?}",
+        seed_ids.len(),
+        interpolated.iter().map(|r| r.len()).collect::<Vec<_>>()
+    );
+
+    let mut indices: Vec<usize> = vec![0; seed_ids.len()];
+    let mut tick: u64 = 0;
+    let mut total_positions: u64 = 0;
+    let start = Instant::now();
+
+    let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(1));
+
+    loop {
+        tokio::select! {
+            _ = interval.tick() => {
+                tick += 1;
+                let now = Utc::now();
+
+                for (i, id) in seed_ids.iter().enumerate() {
+                    let route = &interpolated[i];
+                    let idx = indices[i];
+                    let (lat, lon) = route[idx];
+
+                    sqlx::query(
+                        "INSERT INTO bicycles_location (bicycle_id, location, updated_at) \
+                         VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4)",
+                    )
+                    .bind(id)
+                    .bind(lon)
+                    .bind(lat)
+                    .bind(now)
+                    .execute(pool)
+                    .await
+                    .unwrap_or_else(|e| {
+                        error!("Failed to insert position for bicycle {id}: {e}");
+                        std::process::exit(1);
+                    });
+
+                    // Advance and wrap
+                    indices[i] = (idx + 1) % route.len();
+                }
+
+                total_positions += seed_ids.len() as u64;
+                info!(
+                    "Tick {tick}: inserted {} positions ({total_positions} total)",
+                    seed_ids.len()
+                );
+            }
+            _ = tokio::signal::ctrl_c() => {
+                let elapsed = start.elapsed();
+                info!(
+                    "Shutting down live ingestor: {total_positions} positions inserted over {:.1}s ({tick} ticks)",
+                    elapsed.as_secs_f64()
+                );
+                break;
+            }
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
@@ -107,6 +267,8 @@ async fn main() {
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
         )
         .init();
+
+    let cli = Cli::parse();
 
     // Read DATABASE_URL
     let database_url = match std::env::var("DATABASE_URL") {
@@ -143,70 +305,9 @@ async fn main() {
         }
     }
 
-    // Parse seed UUIDs
-    let seed_ids: Vec<Uuid> = SEED_UUIDS
-        .iter()
-        .map(|s| s.parse::<Uuid>().expect("invalid seed UUID"))
-        .collect();
-
-    let all_routes = routes();
-    let base_time = Utc::now();
-    let mut total_positions: usize = 0;
-
-    for (i, (id, waypoints)) in seed_ids.iter().zip(all_routes.iter()).enumerate() {
-        let positions = interpolate_route(waypoints, 15);
-        let bike_num = i + 1;
-
-        info!(
-            "Seeding bicycle {bike_num}/{} (id: {id}) with {} positions",
-            seed_ids.len(),
-            positions.len()
-        );
-
-        // Delete existing rows for idempotency
-        sqlx::query("DELETE FROM bicycles_location WHERE bicycle_id = $1")
-            .bind(id)
-            .execute(&pool)
-            .await
-            .unwrap_or_else(|e| {
-                error!("Failed to delete existing rows for {id}: {e}");
-                std::process::exit(1);
-            });
-
-        // Insert positions
-        for (j, (lat, lon)) in positions.iter().enumerate() {
-            let updated_at = base_time + Duration::seconds(30 * j as i64);
-
-            sqlx::query(
-                "INSERT INTO bicycles_location (bicycle_id, location, updated_at) \
-                 VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4)",
-            )
-            .bind(id)
-            .bind(lon) // PostGIS: MakePoint(lon, lat)
-            .bind(lat)
-            .bind(updated_at)
-            .execute(&pool)
-            .await
-            .unwrap_or_else(|e| {
-                error!(
-                    "Failed to insert position {}/{} for bicycle {id}: {e}",
-                    j + 1,
-                    positions.len()
-                );
-                std::process::exit(1);
-            });
-        }
-
-        total_positions += positions.len();
-        info!(
-            "  ✓ Bicycle {bike_num} seeded with {} positions",
-            positions.len()
-        );
+    if cli.live {
+        run_live(&pool).await;
+    } else {
+        run_seed(&pool).await;
     }
-
-    info!(
-        "Seed complete: {} bicycles, {} total positions",
-        seed_ids.len(),
-        total_positions
-    );
 }

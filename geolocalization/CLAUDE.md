@@ -26,6 +26,9 @@ docker compose up --build
 
 # Seed database with test data (requires DB running)
 cargo run --bin seed
+
+# Run live ingestor (inserts positions every second, simulating movement)
+cargo run --bin seed -- --live
 ```
 
 The API is served at `http://localhost:8080`. Requires a `.env` file (copy from `.env.example`).

@@ -55,7 +55,8 @@ async fn main() {
         None
     };
 
-    let state = AppState { pool };
+    let (location_tx, _) = tokio::sync::broadcast::channel(256);
+    let state = AppState { pool, location_tx };
     let app = router::build(state);
 
     let addr = format!("0.0.0.0:{port}");

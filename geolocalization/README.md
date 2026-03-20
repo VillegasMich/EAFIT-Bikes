@@ -76,13 +76,14 @@ CREATE INDEX idx_bicycles_location_bicycle_id
 All responses are in JSON. This service returns **only geolocation data**.
 
 ### GET `/locations`
-Returns the current location of all bicycles.
+Returns all bicycle location records. Use `?latest=true` to return only the most recent location per bicycle.
 
 **Response 200:**
 ```json
 [
   {
     "id": "uuid",
+    "bicycle_id": "uuid",
     "latitude": 6.2012,
     "longitude": -75.5742,
     "updated_at": "2026-03-16T10:00:00Z"
@@ -92,68 +93,62 @@ Returns the current location of all bicycles.
 
 ---
 
-### GET `/locations/:id`
-Returns the current location of a single bicycle.
+### GET `/locations/bicycle/:bicycle_id`
+Returns all location records for a specific bicycle. Use `?latest=true` to return only the most recent.
 
-**Response 200:**
-```json
-{
-  "id": "uuid",
-  "latitude": 6.2012,
-  "longitude": -75.5742,
-  "updated_at": "2026-03-16T10:00:00Z"
-}
-```
+**Response 200:** JSON array of location records (empty array if none found).
 
-**Response 404:** Bicycle location not found.
-
----
-
-### PUT `/locations/:id`
-Updates the geographic position of a bicycle.
-
-**Request body:**
-```json
-{
-  "latitude": 6.2018,
-  "longitude": -75.5750
-}
-```
-
-**Response 200:**
-```json
-{
-  "id": "uuid",
-  "latitude": 6.2018,
-  "longitude": -75.5750,
-  "updated_at": "2026-03-16T10:05:00Z"
-}
-```
+**Response 400:** Invalid UUID format.
 
 ---
 
 ### POST `/locations`
-Registers an initial location entry for a new bicycle.
+Records a single bicycle GPS position.
 
 **Request body:**
 ```json
 {
-  "id": "uuid",
+  "bicycle_id": "uuid",
   "latitude": 6.2012,
   "longitude": -75.5742
 }
 ```
 
-**Response 201:** Location created.
-**Response 409:** A location entry for this ID already exists.
+**Response 201:** The created location record.
+**Response 422:** Invalid coordinates (latitude must be [-90, 90], longitude [-180, 180]).
 
 ---
 
-### DELETE `/locations/:id`
-Removes the location entry for a bicycle (e.g., when a bicycle is decommissioned).
+### POST `/locations/batch`
+Records multiple bicycle GPS positions in a single operation.
 
-**Response 204:** Deleted successfully.
-**Response 404:** Not found.
+**Request body:**
+```json
+{
+  "locations": [
+    { "bicycle_id": "uuid", "latitude": 6.2012, "longitude": -75.5742 },
+    { "bicycle_id": "uuid", "latitude": 6.2018, "longitude": -75.5750 }
+  ]
+}
+```
+
+**Response 201:** JSON array of created location records.
+**Response 422:** Invalid coordinates or empty batch.
+
+---
+
+### GET `/locations/stream`
+Server-Sent Events stream of all new location events. Each POST insertion pushes an event to connected clients.
+
+**Response:** `text/event-stream` with `event: location` events containing JSON `LocationResponse` data.
+
+---
+
+### GET `/locations/stream/bicycle/:bicycle_id`
+SSE stream filtered to events for a specific bicycle.
+
+**Response:** `text/event-stream` with only matching bicycle events.
+**Response 400:** Invalid UUID format.
 
 ---
 

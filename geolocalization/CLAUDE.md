@@ -73,10 +73,13 @@ PostGIS stores points as `(longitude, latitude)` internally. The API response se
 | Method | Path | Success | Errors |
 |--------|------|---------|--------|
 | GET | `/locations` | 200 array | — |
-| GET | `/locations/:id` | 200 | 404 |
-| POST | `/locations` | 201 | 409 (duplicate) |
-| PUT | `/locations/:id` | 200 | 404 |
-| DELETE | `/locations/:id` | 204 | 404 |
+| GET | `/locations/bicycle/:bicycle_id` | 200 array | 400 (invalid UUID) |
+| POST | `/locations` | 201 | 422 (validation) |
+| POST | `/locations/batch` | 201 array | 422 (validation, empty batch) |
+| GET | `/locations/stream` | 200 SSE | — |
+| GET | `/locations/stream/bicycle/:bicycle_id` | 200 SSE | 400 (invalid UUID) |
+
+All GET endpoints accept an optional `?latest=true` query parameter to return only the most recent location per bicycle.
 
 Coordinates are validated: latitude ∈ [-90, 90], longitude ∈ [-180, 180]. Invalid values return `422 Unprocessable Entity`.
 

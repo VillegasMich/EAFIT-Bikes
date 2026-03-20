@@ -4,7 +4,7 @@ use chrono::{Duration, Utc};
 use clap::Parser;
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
-use tracing::{debug, error, info};
+use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
 

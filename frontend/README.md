@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# EAFIT Bikes — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A bike-sharing management application built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # Start dev server at http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command            | Description                          |
+| ------------------ | ------------------------------------ |
+| `npm run dev`      | Start development server with HMR    |
+| `npm run build`    | Type-check and build for production  |
+| `npm run lint`     | Run ESLint                           |
+| `npm run preview`  | Preview the production build locally |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+- **React 19** + **TypeScript**
+- **Vite 8** — build tool
+- **React Router 7** — client-side routing
+- **Tailwind CSS 4** — utility-first styling
+- **Leaflet / React-Leaflet** — map visualization
+- **Axios** — HTTP client
+
+## Project Structure
+
 ```
+src/
+├── api/          # Axios-based API service layer
+├── components/   # Reusable components (Navbar, Footer, …)
+├── hooks/        # Custom React hooks
+├── pages/        # Page-level components (Home, NotFound, …)
+├── types/        # Shared TypeScript type definitions
+├── routes.ts     # Centralized route configuration
+├── App.tsx       # Layout shell (Navbar + Outlet + Footer)
+└── main.tsx      # Router provider and app entry point
+```
+
+Data flow: `pages/` → `hooks/` → `api/` → backend.
+
+Routes are defined in `src/routes.ts`. Adding a new page means adding one entry to the config array — the Navbar picks it up automatically.

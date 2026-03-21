@@ -130,7 +130,6 @@ async fn create_location(
     })?;
 
     let location = row_to_location(&row);
-    let _ = state.location_tx.send(location.clone());
     tracing::debug!(?location, "POST /locations");
     Ok((StatusCode::CREATED, Json(location)))
 }
@@ -181,9 +180,6 @@ async fn create_locations_batch(
     })?;
 
     let locations: Vec<LocationResponse> = rows.iter().map(row_to_location).collect();
-    for loc in &locations {
-        let _ = state.location_tx.send(loc.clone());
-    }
     tracing::debug!(count = locations.len(), "POST /locations/batch");
     Ok((StatusCode::CREATED, Json(locations)))
 }

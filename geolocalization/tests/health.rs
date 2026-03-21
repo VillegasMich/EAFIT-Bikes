@@ -7,11 +7,7 @@ use tower::ServiceExt;
 
 #[tokio::test]
 async fn health_returns_200_without_db() {
-    let (location_tx, _) = tokio::sync::broadcast::channel(256);
-    let state = AppState {
-        pool: None,
-        location_tx,
-    };
+    let state = AppState { pool: None };
     let app = router::build(state);
 
     let response = app

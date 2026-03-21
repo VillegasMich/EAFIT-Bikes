@@ -22,11 +22,7 @@ async fn setup_app() -> (axum::Router, Option<PgPool>) {
         Err(_) => None,
     };
 
-    let (location_tx, _) = tokio::sync::broadcast::channel(256);
-    let state = AppState {
-        pool: pool.clone(),
-        location_tx,
-    };
+    let state = AppState { pool: pool.clone() };
     (router::build(state), pool)
 }
 
@@ -428,59 +424,4 @@ async fn post_locations_batch_empty_array() {
         .unwrap();
 
     assert_eq!(resp.status(), StatusCode::UNPROCESSABLE_ENTITY);
-}
-
-// --- 8.5 SSE /locations/stream ---
-
-#[tokio::test]
-async fn sse_stream_receives_location_event() {
-    let (app, pool) = setup_app().await;
-    if !requires_db(&pool) {
-        return;
-    }
-    clear_table(pool.as_ref().unwrap()).await;
-
-    // Connect to SSE stream
-    let resp = app
-        .oneshot(
-            Request::builder()
-                .uri("/locations/stream")
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(resp.status(), StatusCode::OK);
-    assert_eq!(
-        resp.headers().get("content-type").unwrap(),
-        "text/event-stream"
-    );
-}
-
-// --- 8.6 SSE /locations/stream/bicycle/:bicycle_id ---
-
-#[tokio::test]
-async fn sse_stream_by_bicycle_connects() {
-    let (app, pool) = setup_app().await;
-    if !requires_db(&pool) {
-        return;
-    }
-
-    let bike = Uuid::new_v4();
-    let resp = app
-        .oneshot(
-            Request::builder()
-                .uri(&format!("/locations/stream/bicycle/{bike}"))
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(resp.status(), StatusCode::OK);
-    assert_eq!(
-        resp.headers().get("content-type").unwrap(),
-        "text/event-stream"
-    );
 }

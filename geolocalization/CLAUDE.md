@@ -76,8 +76,6 @@ PostGIS stores points as `(longitude, latitude)` internally. The API response se
 | GET | `/locations/bicycle/:bicycle_id` | 200 array | 400 (invalid UUID) |
 | POST | `/locations` | 201 | 422 (validation) |
 | POST | `/locations/batch` | 201 array | 422 (validation, empty batch) |
-| GET | `/locations/stream` | 200 SSE | — |
-| GET | `/locations/stream/bicycle/:bicycle_id` | 200 SSE | 400 (invalid UUID) |
 
 All GET endpoints accept an optional `?latest=true` query parameter to return only the most recent location per bicycle.
 

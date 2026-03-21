@@ -104,40 +104,6 @@ Inserts multiple bicycle locations in a single operation.
 
 ---
 
-## SSE Endpoints
-
-### GET `/locations/stream`
-
-Server-Sent Events stream of all new location events. Each time a location is inserted via POST endpoints, an event is pushed to all connected clients.
-
-**Response:** `200 OK` with `Content-Type: text/event-stream`
-
-**Event Format:**
-
-```
-event: location
-data: {"id":"uuid","bicycle_id":"uuid","latitude":6.20,"longitude":-75.57,"updated_at":"2026-03-20T12:00:00Z"}
-```
-
----
-
-### GET `/locations/stream/bicycle/:bicycle_id`
-
-SSE stream filtered to events for a specific bicycle. Only location events matching the path `bicycle_id` are forwarded.
-
-**Path Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `bicycle_id` | UUID | The bicycle to filter events for |
-
-**Response:** `200 OK` with `Content-Type: text/event-stream`
-
-**Errors:**
-- `400 Bad Request` — invalid UUID format
-
----
-
 ## Common Error Responses
 
 All errors return JSON:

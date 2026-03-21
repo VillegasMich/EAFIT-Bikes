@@ -137,21 +137,6 @@ Records multiple bicycle GPS positions in a single operation.
 
 ---
 
-### GET `/locations/stream`
-Server-Sent Events stream of all new location events. Each POST insertion pushes an event to connected clients.
-
-**Response:** `text/event-stream` with `event: location` events containing JSON `LocationResponse` data.
-
----
-
-### GET `/locations/stream/bicycle/:bicycle_id`
-SSE stream filtered to events for a specific bicycle.
-
-**Response:** `text/event-stream` with only matching bicycle events.
-**Response 400:** Invalid UUID format.
-
----
-
 ## Acceptance Criteria
 
 ### AC-01 — Store location

@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { getLocations } from "../api/locations";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -18,6 +20,12 @@ const EAFIT_CENTER: [number, number] = [6.2006, -75.5783];
 const DEFAULT_ZOOM = 15;
 
 function Map() {
+  useEffect(() => {
+    getLocations({ latest: true })
+      .then((data) => console.log("Locations response:", data))
+      .catch((err) => console.error("Failed to fetch locations:", err));
+  }, []);
+
   return (
     <div className="relative flex-1">
       <MapContainer

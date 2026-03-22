@@ -39,6 +39,12 @@ src/
 
 The planned data flow is: `pages/` → `hooks/` → `api/` → backend. Types are centralized in `types/`.
 
+## Environment Variables
+
+Copy `.env.example` to `.env` and adjust as needed:
+
+- `VITE_API_BASE_URL` — Backend API base URL (defaults to `http://localhost:8080`)
+
 ## After Every Code Change
 
 Run `npm run lint` after every code change to verify nothing is broken.

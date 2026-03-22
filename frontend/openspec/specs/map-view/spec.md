@@ -1,7 +1,7 @@
 ## Requirements
 
-### Requirement: Map page displays interactive Leaflet map
-The application SHALL render an interactive Leaflet map on the `/map` route using OpenStreetMap tiles. The map SHALL be centered on EAFIT University in Medellín, Colombia (latitude 6.2006, longitude -75.5783) at zoom level 15.
+### Requirement: Interactive Leaflet map centered on EAFIT
+The Map page SHALL display an interactive Leaflet map centered on EAFIT University (6.2006, -75.5783) with OpenStreetMap tiles. The map SHALL display the static EAFIT marker AND dynamic bike markers from the polling hook.
 
 #### Scenario: User navigates to map page
 - **WHEN** user navigates to `/map`
@@ -14,6 +14,14 @@ The application SHALL render an interactive Leaflet map on the `/map` route usin
 #### Scenario: Map supports interaction
 - **WHEN** user interacts with the map (pan, zoom)
 - **THEN** the map SHALL respond to pan and zoom gestures
+
+#### Scenario: Map displays both static and dynamic markers
+- **WHEN** the Map page loads and the polling hook returns bike locations
+- **THEN** the map SHALL show the EAFIT University marker AND one marker per bike at its reported coordinates
+
+#### Scenario: Map with no bike data
+- **WHEN** the polling hook has not yet returned data or returns an empty array
+- **THEN** the map SHALL still display the EAFIT University marker
 
 ### Requirement: EAFIT University marker is displayed
 The map SHALL display a blue marker at the EAFIT University location with a popup label.

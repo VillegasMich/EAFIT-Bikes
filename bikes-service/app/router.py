@@ -5,13 +5,16 @@ from app.database import get_db
 from app.models import Bike
 from app.schemas import BikeCreate, BikeResponse
 from app import crud
+from app import publisher
 
 router = APIRouter()
 
-# ✅ CREATE
+# CREATE
 @router.post("/bikes", response_model=BikeResponse, status_code=201)
 def create_bike(bike: BikeCreate, db: Session = Depends(get_db)):
-    return crud.create_bike(db, bike)
+    nueva = crud.create_bike(db, bike)
+    publisher.publish_event("bike_created", nueva.id)
+    return nueva
 
 # GET ALL
 @router.get("/bikes", response_model=List[BikeResponse])
@@ -40,7 +43,9 @@ def delete_bike(bike_id: int, db: Session = Depends(get_db)):
     result = crud.delete_bike(db, bike_id)
     if not result:
         raise HTTPException(status_code=404, detail="Bicicleta no encontrada")
+    publisher.publish_event("bike_deleted", bike_id)
     return {"ok": True}
+
 # PUT
 @router.put("/bikes/{bike_id}", response_model=BikeResponse, status_code=200)
 def put_bike(bike_id: int, bike_data: BikeCreate, db: Session = Depends(get_db)):

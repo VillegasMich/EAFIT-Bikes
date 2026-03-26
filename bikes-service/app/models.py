@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Enum
-from database import Base
+from app.database import Base
 import enum
 
 class TipoBicicleta(str, enum.Enum):

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from models import TipoBicicleta
+from app.models import TipoBicicleta
 
 class BikeCreate(BaseModel):
     marca: str

@@ -14,5 +14,6 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://admin:admin123@db:5432/bikesdb
+      RABBITMQ_URL: amqp://admin:admin123@host.docker.internal:5672/
     depends_on:
       - db

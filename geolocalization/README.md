@@ -272,6 +272,16 @@ cargo run --bin seed -- --live
 
 Set `RUST_LOG=debug` to see per-tick insertion logs.
 
+### Movement Simulator
+
+The mover binary continuously moves all existing bicycles in the database to nearby random positions every second. Unlike the live ingestor (which follows predefined routes for hardcoded bicycles), the mover discovers all bicycles dynamically — including ones added by other processes while it runs.
+
+```bash
+cargo run --bin mover
+```
+
+Each tick, it queries every distinct bicycle's latest position, applies a small random offset (±11–55 meters), and inserts a new position row. Stop with Ctrl+C.
+
 ---
 
 ## Environment Variables

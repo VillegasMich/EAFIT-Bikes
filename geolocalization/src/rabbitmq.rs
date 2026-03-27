@@ -128,7 +128,10 @@ pub async fn start_consumer(pool: PgPool) {
         match event.event.as_str() {
             "bike_created" => match handle_bike_created(&pool, event.bike_id).await {
                 Ok(_) => {
-                    info!(bike_id = event.bike_id, "Created default location for new bicycle");
+                    info!(
+                        bike_id = event.bike_id,
+                        "Created default location for new bicycle"
+                    );
                     delivery.ack(BasicAckOptions::default()).await.ok();
                 }
                 Err(e) => {

@@ -29,6 +29,9 @@ cargo run --bin seed
 
 # Run live ingestor (inserts positions every second, simulating movement)
 cargo run --bin seed -- --live
+
+# Run mover (moves all existing bicycles to nearby random positions every second)
+cargo run --bin mover
 ```
 
 The API is served at `http://localhost:8080`. Requires a `.env` file (copy from `.env.example`).

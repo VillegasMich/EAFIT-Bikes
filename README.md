@@ -246,3 +246,176 @@ rabbitmq-service/
 - **RabbitMQ 3** con plugin de management
 - **Docker** + **Docker Compose** — Contenedores
 - **Kubernetes** — Orquestación (3 réplicas por servicio)
+
+---
+
+# Geolocalization Microservice
+
+Microservicio encargado de almacenar y servir datos de geolocalización en tiempo real de las bicicletas. El frontend consume este servicio para renderizar las posiciones de las bicicletas en un mapa interactivo (Google Maps / Leaflet).
+
+> Este servicio **no** maneja la visualización del mapa. Solo provee datos de geolocalización vía API REST. Toda la lógica de visualización vive en el frontend.
+
+---
+
+## Datos que maneja
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID | Identificador único de la fila, auto-generado |
+| `bicycle_id` | int | ID de la bicicleta (del microservicio de Bikes) |
+| `location` | GEOGRAPHY(POINT, 4326) | Coordenadas geográficas (longitud, latitud) en WGS84 |
+| `updated_at` | timestamptz | Timestamp de la última actualización de posición |
+
+Cada bicicleta puede tener múltiples filas de ubicación (historial de movimiento).
+
+---
+
+## Endpoints
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/locations` | Listar todas las ubicaciones de bicicletas |
+| `GET` | `/locations?latest=true` | Solo la ubicación más reciente por bicicleta |
+| `GET` | `/locations/bicycle/:bicycle_id` | Ubicaciones de una bicicleta específica |
+| `POST` | `/locations` | Registrar una posición GPS de una bicicleta |
+| `POST` | `/locations/batch` | Registrar múltiples posiciones GPS en una sola operación |
+
+**Validación de coordenadas:** latitud ∈ [-90, 90], longitud ∈ [-180, 180]. Valores inválidos retornan `422 Unprocessable Entity`.
+
+Health check disponible en: `GET /health`
+
+---
+
+## Eventos RabbitMQ
+
+Este servicio **consume** eventos de la cola `bike_events`. Si `RABBITMQ_URL` no está configurado o RabbitMQ no está disponible, el servidor HTTP inicia normalmente sin el consumidor.
+
+| Evento | Acción |
+|---|---|
+| `bike_created` | Inserta una ubicación por defecto en la Universidad EAFIT (6.2006, -75.5783) |
+| `bike_deleted` | Elimina todas las filas de ubicación de esa bicicleta |
+
+---
+
+## Variables de entorno
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `DATABASE_URL` | Conexión a PostgreSQL con PostGIS | `postgres://user:pass@db:5432/geolocalization` |
+| `APP_PORT` | Puerto en el que escucha el servicio | `8080` |
+| `RUST_LOG` | Nivel de log (default: `error`) | `info`, `geolocalization=debug` |
+| `RABBITMQ_URL` | Conexión a RabbitMQ para eventos de bicicletas | `amqp://admin:admin123@host.docker.internal:5672/` |
+
+---
+
+## Correr localmente con Docker Compose
+
+> Asegúrate de tener RabbitMQ corriendo antes si quieres que el consumidor de eventos funcione.
+
+```bash
+git checkout microservice/geolocalization
+cd geolocalization
+cp .env.example .env
+docker compose up --build
+```
+
+La app estará disponible en:
+- API: http://localhost:8080/health
+- Base de datos: `localhost:5433`
+
+### Seed data
+
+El proyecto incluye un binario de seed que puebla la base de datos con datos de prueba — múltiples bicicletas con rutas GPS cerca del campus EAFIT.
+
+```bash
+# La base de datos debe estar corriendo
+docker compose up -d db
+
+# Ejecutar el seed
+cargo run --bin seed
+```
+
+### Modo live ingestor
+
+Inserta una nueva posición por bicicleta cada segundo, simulando movimiento continuo a lo largo de rutas predefinidas.
+
+```bash
+cargo run --bin seed -- --live
+```
+
+### Movement simulator
+
+Mueve todas las bicicletas existentes en la base de datos a posiciones aleatorias cercanas cada segundo.
+
+```bash
+cargo run --bin mover
+```
+
+---
+
+## Desplegar en Kubernetes
+
+> **Nota:** Los manifiestos de Kubernetes para este microservicio están pendientes de ser creados. La siguiente sección describe la estructura esperada.
+
+### 1. Construir la imagen Docker
+
+```bash
+cd geolocalization
+docker build -t geolocalization:latest .
+```
+
+### 2. Crear los manifiestos de Kubernetes
+
+Se necesitarán los siguientes recursos en `geolocalization/k8s/`:
+
+| Manifiesto | Descripción |
+|---|---|
+| `secret.yaml` | Credenciales de la base de datos y RabbitMQ |
+| `configmap.yaml` | Variables de configuración (`APP_PORT`, `RUST_LOG`) |
+| `postgres-deployment.yaml` | Deployment de PostgreSQL con PostGIS (`postgis/postgis:16-3.4`) |
+| `postgres-service.yaml` | Service para exponer PostgreSQL internamente |
+| `deployment.yaml` | Deployment del microservicio de geolocalización (3 réplicas) |
+| `service.yaml` | Service tipo LoadBalancer para exponer el API |
+
+### 3. Aplicar los manifiestos
+
+```bash
+kubectl apply -f geolocalization/k8s/secret.yaml
+kubectl apply -f geolocalization/k8s/configmap.yaml
+kubectl apply -f geolocalization/k8s/postgres-deployment.yaml
+kubectl apply -f geolocalization/k8s/postgres-service.yaml
+kubectl apply -f geolocalization/k8s/deployment.yaml
+kubectl apply -f geolocalization/k8s/service.yaml
+```
+
+### 4. Verificar que todo esté corriendo
+
+```bash
+kubectl get pods
+kubectl get services
+```
+
+### 5. Conexión a RabbitMQ en Kubernetes
+
+La variable `RABBITMQ_URL` en el secret debe apuntar al servicio de RabbitMQ por nombre:
+
+```
+amqp://admin:admin123@rabbitmq-service:5672/
+```
+
+### 6. Eliminar los recursos
+
+```bash
+kubectl delete -f geolocalization/k8s/
+```
+
+---
+
+## Tecnologías (Geolocalization)
+
+- **Rust 1.94** + **Axum** — API REST sobre el runtime async **Tokio**
+- **SQLx** — Driver de base de datos con verificación de queries en tiempo de compilación
+- **PostgreSQL + PostGIS** — Almacenamiento geoespacial (`GEOGRAPHY(POINT, 4326)`, WGS84)
+- **Lapin** — Cliente RabbitMQ para consumir eventos de bicicletas
+- **Docker** + **Docker Compose** — Contenedores
+- **Kubernetes** — Orquestación (pendiente)

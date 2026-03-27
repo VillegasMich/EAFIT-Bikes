@@ -12,8 +12,40 @@ class ReservationService:
         self.repository = ReservationRepository()
 
     def create_reservation(self, reservation: ReservationCreate) -> ReservationResponse:
-        """Create a new reservation"""
-        db_reservation = self.repository.create(self.db, reservation)
+        """Create a new reservation
+        
+        Two cases:
+        1. Create draft by bike.created event: Only bike_id provided, status='available'
+           -> Creates new entry
+        2. User makes actual reservation: user_id, start_date, end_date provided, status='reserved'
+           -> Updates existing available entry for that bike
+        """
+        # Validate that the bike exists
+        if not self.repository.bike_exists(self.db, reservation.bike_id):
+            raise ValueError(f"Bike with ID '{reservation.bike_id}' does not exist in the system. Create the bike first before making a reservation.")
+        
+        # If this is a user reservation (not a bike creation event)
+        if reservation.user_id and reservation.start_date and reservation.end_date:
+            # Get the available reservation entry for this bike
+            available_reservation = self.repository.get_available_bike_reservation(
+                self.db, reservation.bike_id
+            )
+            
+            if not available_reservation:
+                raise ValueError(f"Bike '{reservation.bike_id}' is not available for reservation")
+            
+            # Update the existing available entry with reservation details
+            update_data = ReservationUpdate(
+                user_id=reservation.user_id,
+                start_date=reservation.start_date,
+                end_date=reservation.end_date,
+                status='reserved'
+            )
+            db_reservation = self.repository.update(self.db, available_reservation.id, update_data)
+        else:
+            # Create new reservation (from bike.created event)
+            db_reservation = self.repository.create(self.db, reservation)
+        
         return ReservationResponse.model_validate(db_reservation)
 
     def get_reservation(self, reservation_id: UUID) -> ReservationResponse:

@@ -60,6 +60,35 @@ class ReservationRepository:
         return False
 
     @staticmethod
+    def bike_exists(db: Session, bike_id: str) -> bool:
+        """Check if a bike exists in the system"""
+        return db.query(Reservation).filter(Reservation.bike_id == bike_id).first() is not None
+
+    @staticmethod
     def get_active_reservations(db: Session) -> list[Reservation]:
-        """Get all active reservations"""
-        return db.query(Reservation).filter(Reservation.status == 'active').all()
+        """Get all active (reserved) reservations"""
+        return db.query(Reservation).filter(Reservation.status == 'reserved').all()
+    
+    @staticmethod
+    def get_available_bikes(db: Session) -> list[Reservation]:
+        """Get all available bikes"""
+        return db.query(Reservation).filter(Reservation.status == 'available').all()
+    
+    @staticmethod
+    def get_bike_status(db: Session, bike_id: str) -> str:
+        """Get the status of a specific bike ('available' or 'reserved')"""
+        reservation = db.query(Reservation).filter(Reservation.bike_id == bike_id).first()
+        if reservation:
+            return reservation.status
+        return None
+    
+    @staticmethod
+    def get_available_bike_reservation(db: Session, bike_id: str) -> Reservation:
+        """Get the available reservation entry for a bike (status='available')
+        
+        This returns the initial entry created when the bike was registered,
+        which can be updated when a user makes a reservation.
+        """
+        return db.query(Reservation).filter(
+            and_(Reservation.bike_id == bike_id, Reservation.status == 'available')
+        ).first()

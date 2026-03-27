@@ -14,8 +14,11 @@ def create_reservation(
     db: Session = Depends(get_db)
 ):
     """Create a new reservation"""
-    service = ReservationService(db)
-    return service.create_reservation(reservation)
+    try:
+        service = ReservationService(db)
+        return service.create_reservation(reservation)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.get("/{reservation_id}", response_model=ReservationResponse)

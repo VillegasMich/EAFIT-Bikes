@@ -18,7 +18,7 @@ Returns all bicycle location records.
 [
   {
     "id": "uuid",
-    "bicycle_id": "uuid",
+    "bicycle_id": 1,
     "latitude": 6.20,
     "longitude": -75.57,
     "updated_at": "2026-03-20T12:00:00Z"
@@ -36,7 +36,7 @@ Returns all location records for a specific bicycle.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `bicycle_id` | UUID | The bicycle's unique identifier |
+| `bicycle_id` | integer | The bicycle's unique identifier |
 
 **Query Parameters:**
 
@@ -47,7 +47,7 @@ Returns all location records for a specific bicycle.
 **Response:** `200 OK` — JSON array of `LocationResponse` (empty array if no records)
 
 **Errors:**
-- `400 Bad Request` — invalid UUID format
+- `400 Bad Request` — invalid integer format
 
 ---
 
@@ -59,7 +59,7 @@ Inserts a single bicycle location.
 
 ```json
 {
-  "bicycle_id": "uuid",
+  "bicycle_id": 1,
   "latitude": 6.20,
   "longitude": -75.57
 }
@@ -85,8 +85,8 @@ Inserts multiple bicycle locations in a single operation.
 ```json
 {
   "locations": [
-    { "bicycle_id": "uuid", "latitude": 6.20, "longitude": -75.57 },
-    { "bicycle_id": "uuid", "latitude": 6.21, "longitude": -75.58 }
+    { "bicycle_id": 1, "latitude": 6.20, "longitude": -75.57 },
+    { "bicycle_id": 1, "latitude": 6.21, "longitude": -75.58 }
   ]
 }
 ```
@@ -114,6 +114,6 @@ All errors return JSON:
 
 | Status | Meaning |
 |--------|---------|
-| `400` | Bad request (invalid UUID format) |
+| `400` | Bad request (invalid bicycle ID format) |
 | `422` | Validation error (coordinates out of range, empty batch) |
 | `503` | Database unavailable |

@@ -53,7 +53,7 @@ The entire stack is containerized. Docker ensures environment reproducibility ac
 ```sql
 CREATE TABLE bicycles_location (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    bicycle_id   UUID NOT NULL,
+    bicycle_id   INTEGER NOT NULL,
     location     GEOGRAPHY(POINT, 4326) NOT NULL,
     updated_at   TIMESTAMPTZ DEFAULT now()
 );
@@ -65,7 +65,7 @@ CREATE INDEX idx_bicycles_location_bicycle_id
 ```
 
 - `id` — auto-generated row primary key
-- `bicycle_id` — matches the bicycle ID from the Bicycles microservice
+- `bicycle_id` — integer matching the bicycle ID from the Bicycles microservice
 - `location` — geographic point (longitude, latitude) in WGS84
 - `updated_at` — timestamp of the position update
 
@@ -83,7 +83,7 @@ Returns all bicycle location records. Use `?latest=true` to return only the most
 [
   {
     "id": "uuid",
-    "bicycle_id": "uuid",
+    "bicycle_id": 1,
     "latitude": 6.2012,
     "longitude": -75.5742,
     "updated_at": "2026-03-16T10:00:00Z"
@@ -98,7 +98,7 @@ Returns all location records for a specific bicycle. Use `?latest=true` to retur
 
 **Response 200:** JSON array of location records (empty array if none found).
 
-**Response 400:** Invalid UUID format.
+**Response 400:** Invalid integer format.
 
 ---
 
@@ -108,7 +108,7 @@ Records a single bicycle GPS position.
 **Request body:**
 ```json
 {
-  "bicycle_id": "uuid",
+  "bicycle_id": 1,
   "latitude": 6.2012,
   "longitude": -75.5742
 }
@@ -126,8 +126,8 @@ Records multiple bicycle GPS positions in a single operation.
 ```json
 {
   "locations": [
-    { "bicycle_id": "uuid", "latitude": 6.2012, "longitude": -75.5742 },
-    { "bicycle_id": "uuid", "latitude": 6.2018, "longitude": -75.5750 }
+    { "bicycle_id": 1, "latitude": 6.2012, "longitude": -75.5742 },
+    { "bicycle_id": 1, "latitude": 6.2018, "longitude": -75.5750 }
   ]
 }
 ```
@@ -229,6 +229,25 @@ http://localhost:5050
 
 ---
 
+## RabbitMQ Integration
+
+The service consumes events from a RabbitMQ `bike_events` queue. Set `RABBITMQ_URL` to enable the consumer. If the variable is not set or RabbitMQ is unreachable, the HTTP server starts normally without the consumer.
+
+**Supported events:**
+
+| Event | Action |
+|-------|--------|
+| `bike_created` | Inserts a default location at EAFIT University (6.2006, -75.5783) |
+| `bike_deleted` | Deletes all location rows for that bicycle |
+
+**Message format:**
+```json
+{"event": "bike_created", "bike_id": 5}
+{"event": "bike_deleted", "bike_id": 5}
+```
+
+---
+
 ## Seed Data
 
 The project includes a seed binary that populates the database with realistic test data — multiple bicycles with GPS routes near the EAFIT campus.
@@ -262,3 +281,4 @@ Set `RUST_LOG=debug` to see per-tick insertion logs.
 | `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@db:5432/geolocalization` |
 | `APP_PORT` | Port the service listens on | `8080` |
 | `RUST_LOG` | Log level filter (default: `error`) | `info`, `geolocalization=debug` |
+| `RABBITMQ_URL` | RabbitMQ connection URL for bike events | `amqp://admin:admin123@host.docker.internal:5672/` |

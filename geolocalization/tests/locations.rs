@@ -7,7 +7,6 @@ use geolocalization::router;
 use geolocalization::state::AppState;
 use sqlx::PgPool;
 use tower::ServiceExt;
-use uuid::Uuid;
 
 async fn setup_app() -> (axum::Router, Option<PgPool>) {
     dotenvy::dotenv().ok();
@@ -41,7 +40,7 @@ async fn clear_table(pool: &PgPool) {
         .unwrap();
 }
 
-async fn insert_location(pool: &PgPool, bicycle_id: Uuid, lat: f64, lon: f64) {
+async fn insert_location(pool: &PgPool, bicycle_id: i32, lat: f64, lon: f64) {
     sqlx::query(
         "INSERT INTO bicycles_location (bicycle_id, location) VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326))",
     )
@@ -90,11 +89,9 @@ async fn get_locations_returns_all_records() {
     let pool = pool.as_ref().unwrap();
     clear_table(pool).await;
 
-    let bike1 = Uuid::new_v4();
-    let bike2 = Uuid::new_v4();
-    insert_location(pool, bike1, 6.20, -75.57).await;
-    insert_location(pool, bike1, 6.21, -75.58).await;
-    insert_location(pool, bike2, 6.22, -75.59).await;
+    insert_location(pool, 1, 6.20, -75.57).await;
+    insert_location(pool, 1, 6.21, -75.58).await;
+    insert_location(pool, 2, 6.22, -75.59).await;
 
     let resp = app
         .oneshot(
@@ -123,11 +120,9 @@ async fn get_locations_latest_returns_one_per_bicycle() {
     let pool = pool.as_ref().unwrap();
     clear_table(pool).await;
 
-    let bike1 = Uuid::new_v4();
-    let bike2 = Uuid::new_v4();
-    insert_location(pool, bike1, 6.20, -75.57).await;
-    insert_location(pool, bike1, 6.21, -75.58).await;
-    insert_location(pool, bike2, 6.22, -75.59).await;
+    insert_location(pool, 1, 6.20, -75.57).await;
+    insert_location(pool, 1, 6.21, -75.58).await;
+    insert_location(pool, 2, 6.22, -75.59).await;
 
     let resp = app
         .oneshot(
@@ -158,16 +153,14 @@ async fn get_locations_by_bicycle_returns_matching() {
     let pool = pool.as_ref().unwrap();
     clear_table(pool).await;
 
-    let bike1 = Uuid::new_v4();
-    let bike2 = Uuid::new_v4();
-    insert_location(pool, bike1, 6.20, -75.57).await;
-    insert_location(pool, bike1, 6.21, -75.58).await;
-    insert_location(pool, bike2, 6.22, -75.59).await;
+    insert_location(pool, 1, 6.20, -75.57).await;
+    insert_location(pool, 1, 6.21, -75.58).await;
+    insert_location(pool, 2, 6.22, -75.59).await;
 
     let resp = app
         .oneshot(
             Request::builder()
-                .uri(&format!("/locations/bicycle/{bike1}"))
+                .uri("/locations/bicycle/1")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -180,7 +173,7 @@ async fn get_locations_by_bicycle_returns_matching() {
         .unwrap();
     let locations: Vec<LocationResponse> = serde_json::from_slice(&body).unwrap();
     assert_eq!(locations.len(), 2);
-    assert!(locations.iter().all(|l| l.bicycle_id == bike1));
+    assert!(locations.iter().all(|l| l.bicycle_id == 1));
 }
 
 #[tokio::test]
@@ -192,11 +185,10 @@ async fn get_locations_by_bicycle_no_records() {
     let pool = pool.as_ref().unwrap();
     clear_table(pool).await;
 
-    let bike = Uuid::new_v4();
     let resp = app
         .oneshot(
             Request::builder()
-                .uri(&format!("/locations/bicycle/{bike}"))
+                .uri("/locations/bicycle/999")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -212,13 +204,13 @@ async fn get_locations_by_bicycle_no_records() {
 }
 
 #[tokio::test]
-async fn get_locations_by_bicycle_invalid_uuid() {
+async fn get_locations_by_bicycle_invalid_id() {
     let (app, _pool) = setup_app().await;
 
     let resp = app
         .oneshot(
             Request::builder()
-                .uri("/locations/bicycle/not-a-uuid")
+                .uri("/locations/bicycle/not-an-integer")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -237,16 +229,15 @@ async fn get_locations_by_bicycle_latest() {
     let pool = pool.as_ref().unwrap();
     clear_table(pool).await;
 
-    let bike = Uuid::new_v4();
-    insert_location(pool, bike, 6.20, -75.57).await;
+    insert_location(pool, 1, 6.20, -75.57).await;
     // Small delay to ensure different timestamps
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-    insert_location(pool, bike, 6.21, -75.58).await;
+    insert_location(pool, 1, 6.21, -75.58).await;
 
     let resp = app
         .oneshot(
             Request::builder()
-                .uri(&format!("/locations/bicycle/{bike}?latest=true"))
+                .uri("/locations/bicycle/1?latest=true")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -273,7 +264,7 @@ async fn post_location_valid() {
     clear_table(pool.as_ref().unwrap()).await;
 
     let req_body = CreateLocationRequest {
-        bicycle_id: Uuid::new_v4(),
+        bicycle_id: 1,
         latitude: 6.20,
         longitude: -75.57,
     };
@@ -308,7 +299,7 @@ async fn post_location_invalid_coordinates() {
     }
 
     let req_body = serde_json::json!({
-        "bicycle_id": Uuid::new_v4(),
+        "bicycle_id": 1,
         "latitude": 91.0,
         "longitude": -75.57,
     });
@@ -341,12 +332,12 @@ async fn post_locations_batch_valid() {
     let req_body = CreateLocationBatchRequest {
         locations: vec![
             CreateLocationRequest {
-                bicycle_id: Uuid::new_v4(),
+                bicycle_id: 1,
                 latitude: 6.20,
                 longitude: -75.57,
             },
             CreateLocationRequest {
-                bicycle_id: Uuid::new_v4(),
+                bicycle_id: 2,
                 latitude: 6.21,
                 longitude: -75.58,
             },
@@ -382,8 +373,8 @@ async fn post_locations_batch_invalid_entry() {
 
     let req_body = serde_json::json!({
         "locations": [
-            {"bicycle_id": Uuid::new_v4(), "latitude": 6.20, "longitude": -75.57},
-            {"bicycle_id": Uuid::new_v4(), "latitude": 91.0, "longitude": -75.58},
+            {"bicycle_id": 1, "latitude": 6.20, "longitude": -75.57},
+            {"bicycle_id": 2, "latitude": 91.0, "longitude": -75.58},
         ]
     });
 

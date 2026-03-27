@@ -6,7 +6,7 @@ use uuid::Uuid;
 #[derive(Debug, sqlx::FromRow)]
 pub struct BicycleLocation {
     pub id: Uuid,
-    pub bicycle_id: Uuid,
+    pub bicycle_id: i32,
     pub latitude: f64,
     pub longitude: f64,
     pub updated_at: DateTime<Utc>,
@@ -16,7 +16,7 @@ pub struct BicycleLocation {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LocationResponse {
     pub id: Uuid,
-    pub bicycle_id: Uuid,
+    pub bicycle_id: i32,
     pub latitude: f64,
     pub longitude: f64,
     pub updated_at: DateTime<Utc>,
@@ -25,7 +25,7 @@ pub struct LocationResponse {
 /// Request body for creating a single bicycle location.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateLocationRequest {
-    pub bicycle_id: Uuid,
+    pub bicycle_id: i32,
     pub latitude: f64,
     pub longitude: f64,
 }

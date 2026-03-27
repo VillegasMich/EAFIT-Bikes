@@ -6,7 +6,6 @@ use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
-use uuid::Uuid;
 
 /// Seed binary for the geolocalization microservice.
 ///
@@ -21,13 +20,8 @@ struct Cli {
     live: bool,
 }
 
-/// Fixed seed UUIDs following the `00000000-0000-4000-a000-*` pattern.
-const SEED_UUIDS: [&str; 4] = [
-    "00000000-0000-4000-a000-000000000001",
-    "00000000-0000-4000-a000-000000000002",
-    "00000000-0000-4000-a000-000000000003",
-    "00000000-0000-4000-a000-000000000004",
-];
+/// Fixed seed bicycle IDs.
+const SEED_IDS: [i32; 4] = [1, 2, 3, 4];
 
 /// Waypoint routes near the EAFIT campus in Medellín (lat ~6.20, lon ~-75.57).
 /// Each route is a sequence of (latitude, longitude) waypoints.
@@ -117,22 +111,17 @@ fn interpolate_route(waypoints: &[(f64, f64)], min_points: usize) -> Vec<(f64, f
 
 /// One-shot seed: insert static location data for all bicycles.
 async fn run_seed(pool: &PgPool) {
-    let seed_ids: Vec<Uuid> = SEED_UUIDS
-        .iter()
-        .map(|s| s.parse::<Uuid>().expect("invalid seed UUID"))
-        .collect();
-
     let all_routes = routes();
     let base_time = Utc::now();
     let mut total_positions: usize = 0;
 
-    for (i, (id, waypoints)) in seed_ids.iter().zip(all_routes.iter()).enumerate() {
+    for (i, (id, waypoints)) in SEED_IDS.iter().zip(all_routes.iter()).enumerate() {
         let positions = interpolate_route(waypoints, 15);
         let bike_num = i + 1;
 
         info!(
             "Seeding bicycle {bike_num}/{} (id: {id}) with {} positions",
-            seed_ids.len(),
+            SEED_IDS.len(),
             positions.len()
         );
 
@@ -179,18 +168,13 @@ async fn run_seed(pool: &PgPool) {
 
     info!(
         "Seed complete: {} bicycles, {} total positions",
-        seed_ids.len(),
+        SEED_IDS.len(),
         total_positions
     );
 }
 
 /// Live ingestor: continuously insert positions every second to simulate movement.
 async fn run_live(pool: &PgPool) {
-    let seed_ids: Vec<Uuid> = SEED_UUIDS
-        .iter()
-        .map(|s| s.parse::<Uuid>().expect("invalid seed UUID"))
-        .collect();
-
     let all_routes = routes();
     let interpolated: Vec<Vec<(f64, f64)>> = all_routes
         .iter()
@@ -199,11 +183,11 @@ async fn run_live(pool: &PgPool) {
 
     info!(
         "Live ingestor started: {} bicycles, route lengths: {:?}",
-        seed_ids.len(),
+        SEED_IDS.len(),
         interpolated.iter().map(|r| r.len()).collect::<Vec<_>>()
     );
 
-    let mut indices: Vec<usize> = vec![0; seed_ids.len()];
+    let mut indices: Vec<usize> = vec![0; SEED_IDS.len()];
     let mut tick: u64 = 0;
     let mut total_positions: u64 = 0;
     let start = Instant::now();
@@ -216,7 +200,7 @@ async fn run_live(pool: &PgPool) {
                 tick += 1;
                 let now = Utc::now();
 
-                for (i, id) in seed_ids.iter().enumerate() {
+                for (i, id) in SEED_IDS.iter().enumerate() {
                     let route = &interpolated[i];
                     let idx = indices[i];
                     let (lat, lon) = route[idx];
@@ -240,10 +224,10 @@ async fn run_live(pool: &PgPool) {
                     indices[i] = (idx + 1) % route.len();
                 }
 
-                total_positions += seed_ids.len() as u64;
+                total_positions += SEED_IDS.len() as u64;
                 info!(
                     "Tick {tick}: inserted {} positions ({total_positions} total)",
-                    seed_ids.len()
+                    SEED_IDS.len()
                 );
             }
             _ = tokio::signal::ctrl_c() => {

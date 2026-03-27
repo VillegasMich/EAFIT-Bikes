@@ -1,5 +1,6 @@
 mod errors;
 mod models;
+mod rabbitmq;
 mod router;
 mod routes;
 mod state;
@@ -54,6 +55,10 @@ async fn main() {
         warn!("Skipping migrations (no database connection)");
         None
     };
+
+    if let Some(ref p) = pool {
+        tokio::spawn(rabbitmq::start_consumer(p.clone()));
+    }
 
     let state = AppState { pool };
     let app = router::build(state);

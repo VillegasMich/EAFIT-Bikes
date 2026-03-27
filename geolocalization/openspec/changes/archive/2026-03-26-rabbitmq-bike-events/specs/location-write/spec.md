@@ -1,4 +1,11 @@
-## ADDED Requirements
+## MODIFIED Requirements
+
+### Requirement: CreateLocationRequest struct
+The system SHALL define a `CreateLocationRequest` struct with fields: `bicycle_id` (i32), `latitude` (f64), `longitude` (f64). The struct SHALL derive `Deserialize`. The struct SHALL have `///` documentation comments.
+
+#### Scenario: Deserialization from valid JSON
+- **WHEN** a JSON object with `bicycle_id` (integer), `latitude` (number), and `longitude` (number) is deserialized
+- **THEN** a valid `CreateLocationRequest` is produced
 
 ### Requirement: Create a single bicycle location
 The system SHALL expose a POST `/locations` endpoint that accepts a JSON body matching `CreateLocationRequest` and inserts a new row into `bicycles_location`. On success the system SHALL return 201 with the inserted row as a `LocationResponse`.
@@ -37,13 +44,6 @@ The system SHALL expose a POST `/locations/batch` endpoint that accepts a JSON b
 #### Scenario: Database unavailable during batch creation
 - **WHEN** the client sends POST `/locations/batch` and the database connection is unavailable
 - **THEN** the system responds with 503 Service Unavailable
-
-### Requirement: CreateLocationRequest struct
-The system SHALL define a `CreateLocationRequest` struct with fields: `bicycle_id` (i32), `latitude` (f64), `longitude` (f64). The struct SHALL derive `Deserialize`. The struct SHALL have `///` documentation comments.
-
-#### Scenario: Deserialization from valid JSON
-- **WHEN** a JSON object with `bicycle_id` (integer), `latitude` (number), and `longitude` (number) is deserialized
-- **THEN** a valid `CreateLocationRequest` is produced
 
 ### Requirement: CreateLocationBatchRequest struct
 The system SHALL define a `CreateLocationBatchRequest` struct with a single field `locations` of type `Vec<CreateLocationRequest>`. The struct SHALL derive `Deserialize`. The struct SHALL have `///` documentation comments.

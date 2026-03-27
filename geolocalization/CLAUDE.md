@@ -47,6 +47,7 @@ Do not suggest replacing or adding technologies covered by these ADRs without ex
 - **Rust** with **Axum** (HTTP framework) on the **Tokio** async runtime
 - **PostgreSQL + PostGIS** for geospatial storage (`GEOGRAPHY(POINT, 4326)`, WGS84 coordinates)
 - **SQLx** for compile-time-verified async SQL queries
+- **RabbitMQ** consumer for `bike_events` queue (via `lapin` crate)
 - **Docker Compose** to orchestrate the service and `postgis/postgis` containers
 
 ## Database
@@ -56,7 +57,7 @@ Single table:
 ```sql
 CREATE TABLE bicycles_location (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    bicycle_id  UUID NOT NULL,         -- matches ID from Bicycles microservice
+    bicycle_id  INTEGER NOT NULL,      -- matches ID from Bicycles microservice
     location    GEOGRAPHY(POINT, 4326) NOT NULL,
     updated_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -73,7 +74,7 @@ PostGIS stores points as `(longitude, latitude)` internally. The API response se
 | Method | Path | Success | Errors |
 |--------|------|---------|--------|
 | GET | `/locations` | 200 array | — |
-| GET | `/locations/bicycle/:bicycle_id` | 200 array | 400 (invalid UUID) |
+| GET | `/locations/bicycle/:bicycle_id` | 200 array | 400 (invalid integer) |
 | POST | `/locations` | 201 | 422 (validation) |
 | POST | `/locations/batch` | 201 array | 422 (validation, empty batch) |
 
@@ -114,3 +115,4 @@ When adding new endpoints or features, include appropriate log events at the lev
 | `DATABASE_URL` | `postgres://user:pass@db:5432/geolocalization` |
 | `APP_PORT` | `8080` |
 | `RUST_LOG` | `error` (default), `info`, `geolocalization=debug` |
+| `RABBITMQ_URL` | `amqp://admin:admin123@host.docker.internal:5672/` |

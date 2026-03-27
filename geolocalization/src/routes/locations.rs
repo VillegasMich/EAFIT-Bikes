@@ -6,7 +6,6 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use sqlx::Row;
-use uuid::Uuid;
 
 use crate::errors::{AppError, validate_coordinates};
 use crate::models::{
@@ -62,7 +61,7 @@ async fn get_all_locations(
 /// GET /locations/bicycle/:bicycle_id — returns locations for a specific bicycle.
 async fn get_locations_by_bicycle(
     State(state): State<AppState>,
-    Path(bicycle_id): Path<Uuid>,
+    Path(bicycle_id): Path<i32>,
     Query(query): Query<LocationQuery>,
 ) -> Result<Json<Vec<LocationResponse>>, AppError> {
     let pool = state.pool.as_ref().ok_or(AppError::DatabaseUnavailable)?;
@@ -156,13 +155,13 @@ async fn create_locations_batch(
         })?;
     }
 
-    let bicycle_ids: Vec<Uuid> = req.locations.iter().map(|l| l.bicycle_id).collect();
+    let bicycle_ids: Vec<i32> = req.locations.iter().map(|l| l.bicycle_id).collect();
     let longitudes: Vec<f64> = req.locations.iter().map(|l| l.longitude).collect();
     let latitudes: Vec<f64> = req.locations.iter().map(|l| l.latitude).collect();
 
     let rows = sqlx::query(
         r#"INSERT INTO bicycles_location (bicycle_id, location)
-        SELECT unnest($1::uuid[]), ST_SetSRID(ST_MakePoint(unnest($2::float8[]), unnest($3::float8[])), 4326)
+        SELECT unnest($1::int4[]), ST_SetSRID(ST_MakePoint(unnest($2::float8[]), unnest($3::float8[])), 4326)
         RETURNING
             id, bicycle_id,
             ST_Y(location::geometry) as latitude,

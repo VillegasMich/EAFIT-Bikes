@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: geo-db-service
+spec:
+  selector:
+    app: geo-postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

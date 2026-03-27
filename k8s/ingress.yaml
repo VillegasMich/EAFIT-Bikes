@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eafit-bikes-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /bikes
+            pathType: Prefix
+            backend:
+              service:
+                name: bikes-service
+                port:
+                  number: 80
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: bikes-service
+                port:
+                  number: 80
+          - path: /locations
+            pathType: Prefix
+            backend:
+              service:
+                name: geo-service
+                port:
+                  number: 80
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: geo-service
+                port:
+                  number: 80

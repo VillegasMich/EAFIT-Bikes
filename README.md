@@ -145,62 +145,106 @@ La app estará disponible en:
 
 ## Desplegar en Kubernetes
 
-### RabbitMQ
+Todos los servicios se exponen a través de un **Nginx Ingress** que enruta el tráfico por path:
 
-#### 1. Aplicar los manifiestos
+| Path | Servicio |
+|------|----------|
+| `/bikes/*` | `bikes-service` |
+| `/docs` | `bikes-service` (Swagger UI) |
+| `/locations/*` | `geo-service` |
+| `/health` | `geo-service` |
+
+### 1. Habilitar el Ingress Controller
+
+**Minikube:**
 ```bash
+minikube addons enable ingress
+```
+
+**Docker Desktop:**
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/cloud/deploy.yaml
+```
+
+### 2. Construir las imágenes Docker
+
+**Minikube** — las imágenes deben existir dentro del Docker de Minikube:
+```bash
+eval $(minikube docker-env)
+docker build -t bikes-service:latest bikes-service/
+docker build -t geolocalization:latest geolocalization/
+```
+
+**Docker Desktop** — basta con construir normalmente:
+```bash
+docker build -t bikes-service:latest bikes-service/
+docker build -t geolocalization:latest geolocalization/
+```
+
+### 3. Aplicar los manifiestos
+
+```bash
+# RabbitMQ
 kubectl apply -f rabbitmq-service/k8s/deployment.yaml
 kubectl apply -f rabbitmq-service/k8s/service.yaml
+
+# Bikes
+kubectl apply -f bikes-service/k8s/secret.yaml
+kubectl apply -f bikes-service/k8s/configmap.yaml
+kubectl apply -f bikes-service/k8s/postgres-deployment.yaml
+kubectl apply -f bikes-service/k8s/postgres-service.yaml
+kubectl apply -f bikes-service/k8s/deployment.yaml
+kubectl apply -f bikes-service/k8s/service.yaml
+
+# Geolocalization
+kubectl apply -f geolocalization/k8s/secret.yaml
+kubectl apply -f geolocalization/k8s/configmap.yaml
+kubectl apply -f geolocalization/k8s/postgres-deployment.yaml
+kubectl apply -f geolocalization/k8s/postgres-service.yaml
+kubectl apply -f geolocalization/k8s/deployment.yaml
+kubectl apply -f geolocalization/k8s/service.yaml
+
+# Ingress
+kubectl apply -f k8s/ingress.yaml
 ```
 
-#### 2. Verificar
+### 4. Verificar que todo esté corriendo
+
 ```bash
 kubectl get pods
 kubectl get services
+kubectl get ingress
 ```
 
-Deberías ver 3 réplicas de `rabbitmq-deployment` en estado `Running` y el servicio `rabbitmq-service` con `EXTERNAL-IP: localhost`.
+Deberías ver las réplicas de cada deployment en estado `Running` y el ingress `eafit-bikes-ingress` con una dirección asignada.
 
-Panel de administración disponible en: http://localhost:15672
+### 5. Acceder a los servicios
 
-#### 3. Eliminar los recursos
+**Docker Desktop:** los endpoints están disponibles directamente en `localhost`:
+- Bikes API: http://localhost/bikes
+- Swagger UI: http://localhost/docs
+- Locations API: http://localhost/locations
+- Health check: http://localhost/health
+
+**Minikube:** usa la IP de Minikube (`minikube ip`):
+- Bikes API: http://\<minikube-ip\>/bikes
+- Swagger UI: http://\<minikube-ip\>/docs
+- Locations API: http://\<minikube-ip\>/locations
+- Health check: http://\<minikube-ip\>/health
+
+**Panel de RabbitMQ** (ambos entornos):
 ```bash
-kubectl delete -f rabbitmq-service/k8s/
+kubectl port-forward svc/rabbitmq-service 15672:15672
 ```
+Luego acceder a: http://localhost:15672
 
-### Bikes
+### 6. Eliminar los recursos
 
-#### 1. Construir la imagen Docker
-```bash
-cd bikes-service
-docker build -t bikes-service:latest .
-```
-
-#### 2. Aplicar los manifiestos
-```bash
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/postgres-deployment.yaml
-kubectl apply -f k8s/postgres-service.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-```
-
-#### 3. Verificar que todo esté corriendo
-```bash
-kubectl get pods
-kubectl get services
-```
-
-Deberías ver 3 réplicas de `bikes-deployment` y 3 de `postgres-deployment` en estado `Running`.
-
-La app estará disponible en:
-- API: http://localhost/docs
-- Panel RabbitMQ: http://localhost:15672
-
-#### 4. Eliminar los recursos
 ```bash
 kubectl delete -f k8s/
+kubectl delete -f bikes-service/k8s/
+kubectl delete -f geolocalization/k8s/
+kubectl delete -f rabbitmq-service/k8s/
 ```
 
 ---
@@ -355,58 +399,14 @@ cargo run --bin mover
 
 ## Desplegar en Kubernetes
 
-> **Nota:** Los manifiestos de Kubernetes para este microservicio están pendientes de ser creados. La siguiente sección describe la estructura esperada.
+El despliegue de todos los microservicios (incluyendo Geolocalization) se documenta en la sección [Desplegar en Kubernetes](#desplegar-en-kubernetes) del Bikes Microservice arriba.
 
-### 1. Construir la imagen Docker
-
-```bash
-cd geolocalization
-docker build -t geolocalization:latest .
-```
-
-### 2. Crear los manifiestos de Kubernetes
-
-Se necesitarán los siguientes recursos en `geolocalization/k8s/`:
-
-| Manifiesto | Descripción |
-|---|---|
-| `secret.yaml` | Credenciales de la base de datos y RabbitMQ |
-| `configmap.yaml` | Variables de configuración (`APP_PORT`, `RUST_LOG`) |
-| `postgres-deployment.yaml` | Deployment de PostgreSQL con PostGIS (`postgis/postgis:16-3.4`) |
-| `postgres-service.yaml` | Service para exponer PostgreSQL internamente |
-| `deployment.yaml` | Deployment del microservicio de geolocalización (3 réplicas) |
-| `service.yaml` | Service tipo LoadBalancer para exponer el API |
-
-### 3. Aplicar los manifiestos
-
-```bash
-kubectl apply -f geolocalization/k8s/secret.yaml
-kubectl apply -f geolocalization/k8s/configmap.yaml
-kubectl apply -f geolocalization/k8s/postgres-deployment.yaml
-kubectl apply -f geolocalization/k8s/postgres-service.yaml
-kubectl apply -f geolocalization/k8s/deployment.yaml
-kubectl apply -f geolocalization/k8s/service.yaml
-```
-
-### 4. Verificar que todo esté corriendo
-
-```bash
-kubectl get pods
-kubectl get services
-```
-
-### 5. Conexión a RabbitMQ en Kubernetes
+### Conexión a RabbitMQ en Kubernetes
 
 La variable `RABBITMQ_URL` en el secret debe apuntar al servicio de RabbitMQ por nombre:
 
 ```
 amqp://admin:admin123@rabbitmq-service:5672/
-```
-
-### 6. Eliminar los recursos
-
-```bash
-kubectl delete -f geolocalization/k8s/
 ```
 
 ---
@@ -418,4 +418,4 @@ kubectl delete -f geolocalization/k8s/
 - **PostgreSQL + PostGIS** — Almacenamiento geoespacial (`GEOGRAPHY(POINT, 4326)`, WGS84)
 - **Lapin** — Cliente RabbitMQ para consumir eventos de bicicletas
 - **Docker** + **Docker Compose** — Contenedores
-- **Kubernetes** — Orquestación (pendiente)
+- **Kubernetes** — Orquestación (3 réplicas por servicio)

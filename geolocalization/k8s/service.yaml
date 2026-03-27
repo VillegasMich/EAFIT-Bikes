@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: bikes-service
+  name: geo-service
 spec:
   selector:
-    app: bikes
+    app: geolocalization
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8000
+      targetPort: 8080
   type: ClusterIP

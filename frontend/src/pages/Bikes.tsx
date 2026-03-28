@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useBikes } from "../hooks/useBikes";
+import { useNotification } from "../hooks/useNotification";
 import type { Bike, BikeCreate, BikeType } from "../types/bike";
 import { BIKE_TYPES } from "../types/bike";
 
@@ -8,6 +9,7 @@ const emptyForm: BikeCreate = { marca: "", tipo: "Cross", color: "" };
 function Bikes() {
   const { bikes, loading, error, createBike, updateBike, deleteBike } =
     useBikes();
+  const { addNotification } = useNotification();
 
   const [showForm, setShowForm] = useState(false);
   const [editingBike, setEditingBike] = useState<Bike | null>(null);
@@ -39,10 +41,16 @@ function Bikes() {
     try {
       if (editingBike) {
         await updateBike(editingBike.id, form);
+        addNotification("Bike updated successfully", "success");
       } else {
         await createBike(form);
+        addNotification("Bike created successfully", "success");
       }
       closeForm();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Operation failed";
+      addNotification(message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -52,6 +60,11 @@ function Bikes() {
     setSubmitting(true);
     try {
       await deleteBike(id);
+      addNotification("Bike deleted successfully", "success");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to delete bike";
+      addNotification(message, "error");
     } finally {
       setDeletingId(null);
       setSubmitting(false);

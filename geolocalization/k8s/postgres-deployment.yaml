@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geo-postgres-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: geo-postgres
+  template:
+    metadata:
+      labels:
+        app: geo-postgres
+    spec:
+      containers:
+        - name: geo-postgres
+          image: postgis/postgis:16-3.4
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: geo-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: geo-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: geolocalization

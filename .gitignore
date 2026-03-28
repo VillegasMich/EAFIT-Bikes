@@ -1,0 +1,32 @@
+# Entorno virtual
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Variables de entorno
+.env
+*.env
+
+# IDEs
+.vscode/
+.idea/
+*.DS_Store
+
+# Logs
+*.log
+
+# Rust
+**/target/
+
+# Front
+**/dist/
+**/node_modules/
+
+# residuo microservicio
+bikes-service/

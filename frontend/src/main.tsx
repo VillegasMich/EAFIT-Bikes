@@ -3,10 +3,12 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
+import { NotificationProvider } from "./components/NotificationProvider.tsx";
 import { routes, notFoundRoute } from "./routes.ts";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <NotificationProvider>
     <BrowserRouter>
       <Routes>
         <Route element={<App />}>
@@ -24,5 +26,6 @@ createRoot(document.getElementById("root")!).render(
         </Route>
       </Routes>
     </BrowserRouter>
+    </NotificationProvider>
   </StrictMode>
 );

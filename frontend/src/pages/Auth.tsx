@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { syncAuthWithBackend } from "../api/auth";
+import { syncAuthWithBackend, checkBackendHealth } from "../api/auth";
 import { getFirebaseAuth, isFirebaseConfigured } from "../firebase/config";
 
 function firebaseErrorMessage(code: string): string {
@@ -32,6 +32,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [role, setRole] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,10 +52,22 @@ export default function Auth() {
       return;
     }
 
+    if (mode === "register" && !role) {
+      setError("Please select a role.");
+      return;
+    }
+
     setSubmitting(true);
     const auth = getFirebaseAuth();
 
     try {
+      const backendIsHealthy = await checkBackendHealth();
+      if (!backendIsHealthy) {
+        setError("Backend service is not available. Please try again later.");
+        setSubmitting(false);
+        return;
+      }
+
       if (mode === "register") {
         const cred = await createUserWithEmailAndPassword(
           auth,
@@ -64,7 +77,7 @@ export default function Auth() {
         console.log("cred", cred);
         const idToken = await cred.user.getIdToken();
         console.log("idToken", idToken);
-        await syncAuthWithBackend("register", idToken);
+        await syncAuthWithBackend("register", idToken, role);
       } else {
         const cred = await signInWithEmailAndPassword(
           auth,
@@ -82,17 +95,19 @@ export default function Auth() {
           : "";
       if (code.startsWith("auth/")) {
         setError(firebaseErrorMessage(code));
-      } else if (
-        err &&
-        typeof err === "object" &&
-        "response" in err &&
-        err.response &&
-        typeof err.response === "object" &&
-        "status" in err.response
-      ) {
-        setError("Could not reach the server or it rejected the request.");
       } else {
-        setError("Could not complete the request. Check your connection.");
+        if (
+          err &&
+          typeof err === "object" &&
+          "response" in err &&
+          err.response &&
+          typeof err.response === "object" &&
+          "status" in err.response
+        ) {
+          setError("Could not reach the server or it rejected the request.");
+        } else {
+          setError("Could not complete the request. Check your connection.");
+        }
       }
     } finally {
       setSubmitting(false);
@@ -135,6 +150,7 @@ export default function Auth() {
             }`}
             onClick={() => {
               setMode("register");
+              setRole("");
               setError(null);
             }}
           >
@@ -181,24 +197,45 @@ export default function Auth() {
             />
           </div>
           {mode === "register" && (
-            <div>
-              <label
-                htmlFor="auth-confirm"
-                className="mb-1 block text-sm font-medium text-gray-700"
-              >
-                Confirm password
-              </label>
-              <input
-                id="auth-confirm"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={6}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+            <>
+              <div>
+                <label
+                  htmlFor="auth-confirm"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Confirm password
+                </label>
+                <input
+                  id="auth-confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="auth-role"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Role *
+                </label>
+                <select
+                  id="auth-role"
+                  required
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select a role</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </>
           )}
 
           {error && (

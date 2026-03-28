@@ -6,7 +6,7 @@ use lapin::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use tracing::{debug, error, info, warn};
+use tracing::{error, info, warn};
 
 const QUEUE_NAME: &str = "bike_events";
 

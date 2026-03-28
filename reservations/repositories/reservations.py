@@ -1,8 +1,26 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from models.reservations import Reservation
+from sqlalchemy import and_, or_
+from models.reservations import Bike, Reservation
 from schemas.reservations import ReservationCreate, ReservationUpdate
 from uuid import UUID
+
+
+class BikeRepository:
+    """Repository for Bike database operations
+    
+    Note: Bikes are managed only through RabbitMQ events (bike.created, bike.deleted)
+    This repository only provides read access to registered bikes.
+    """
+
+    @staticmethod
+    def get_all(db: Session) -> list[Bike]:
+        """Get all registered bikes"""
+        return db.query(Bike).all()
+
+    @staticmethod
+    def exists(db: Session, bike_id: str) -> bool:
+        """Check if a bike exists in the system"""
+        return db.query(Bike).filter(Bike.bike_id == bike_id).first() is not None
 
 
 class ReservationRepository:
@@ -50,35 +68,26 @@ class ReservationRepository:
         return db_reservation
 
     @staticmethod
-    def bike_exists(db: Session, bike_id: str) -> bool:
-        """Check if a bike exists in the system"""
-        return db.query(Reservation).filter(Reservation.bike_id == bike_id).first() is not None
-
-    @staticmethod
-    def get_active_reservations(db: Session) -> list[Reservation]:
-        """Get all active (reserved) reservations"""
-        return db.query(Reservation).filter(Reservation.status == 'reserved').all()
-    
-    @staticmethod
-    def get_available_bikes(db: Session) -> list[Reservation]:
-        """Get all available bikes"""
-        return db.query(Reservation).filter(Reservation.status == 'available').all()
-    
-    @staticmethod
-    def get_bike_status(db: Session, bike_id: str) -> str:
-        """Get the status of a specific bike ('available' or 'reserved')"""
-        reservation = db.query(Reservation).filter(Reservation.bike_id == bike_id).first()
-        if reservation:
-            return reservation.status
-        return None
-    
-    @staticmethod
-    def get_available_bike_reservation(db: Session, bike_id: str) -> Reservation:
-        """Get the available reservation entry for a bike (status='available')
+    def get_conflicting_reservations(db: Session, bike_id: str, start_date, end_date) -> list[Reservation]:
+        """
+        Get all reservations that conflict with the given date range.
         
-        This returns the initial entry created when the bike was registered,
-        which can be updated when a user makes a reservation.
+        A conflict exists if:
+        - existing.start_date < new.end_date AND existing.end_date > new.start_date
+        
+        Args:
+            db: Database session
+            bike_id: The bike ID
+            start_date: Requested start date
+            end_date: Requested end date
+            
+        Returns:
+            List of conflicting reservations, empty if no conflicts
         """
         return db.query(Reservation).filter(
-            and_(Reservation.bike_id == bike_id, Reservation.status == 'available')
-        ).first()
+            and_(
+                Reservation.bike_id == bike_id,
+                Reservation.start_date < end_date,
+                Reservation.end_date > start_date
+            )
+        ).all()

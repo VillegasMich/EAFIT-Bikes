@@ -1,0 +1,1099 @@
+[2026-03-28 09:42:26] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 09:42:26] INFO     [models] Database connection test successful
+[2026-03-28 09:42:26] INFO     [main] Database connection verified
+[2026-03-28 09:42:26] INFO     [main] Database schema initialized
+[2026-03-28 09:42:26] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 09:42:26] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 09:42:26] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 09:42:26] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 09:42:26] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 09:42:26] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 09:44:55] INFO     [rabbitmq.consumer] Received message: bike_id='bike-12345' event='bike.created'
+[2026-03-28 09:44:55] INFO     [rabbitmq.consumer] Processing bike_created event for bike_id='bike-12345'
+[2026-03-28 09:44:55] INFO     [services.bike_events] Processing bike.created event | bike_id='bike-12345'
+[2026-03-28 09:44:55] INFO     [services.bike_events] Bike registered | bike_id='bike-12345' | created_at=2026-03-28 14:44:55.347891+00:00
+[2026-03-28 09:44:55] INFO     [rabbitmq.consumer] Event processed successfully: Bike 'bike-12345' registered successfully
+[2026-03-28 09:44:55] INFO     [rabbitmq.consumer] Message acknowledged: bike_id='bike-12345'
+[2026-03-28 13:36:06] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:36:06] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:36:06] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 50044, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:36:06] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.9ac0961ab65641bd99b3410a3207ce62'])>"])>
+[2026-03-28 13:36:06] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:36:06] ERROR    [main] Error stopping RabbitMQ consumer: 'NoneType' object has no attribute 'write'
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1538, in close
+    self._impl.close(reply_code=reply_code, reply_text=reply_text)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 552, in close
+    self._rpc(spec.Channel.Close(reply_code, reply_text, 0, 0),
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              self._on_closeok, [spec.Channel.CloseOk])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1358, in _rpc
+    self._send_method(method)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1415, in _send_method
+    self.connection._send_method(self.channel_number, method, content)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2255, in _send_method
+    self._send_frame(frame.Method(channel_number, method))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2241, in _send_frame
+    self._output_marshaled_frames([marshaled_frame])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2332, in _output_marshaled_frames
+    self._adapter_emit_data(marshaled_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/base_connection.py", line 386, in _adapter_emit_data
+    self._transport.write(data)
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'write'
+[2026-03-28 13:36:06] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:36:06] INFO     [main] Service shutdown complete
+[2026-03-28 13:36:07] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:36:07] INFO     [models] Database connection test successful
+[2026-03-28 13:36:07] INFO     [main] Database connection verified
+[2026-03-28 13:36:07] INFO     [main] Database schema initialized
+[2026-03-28 13:36:07] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:36:07] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:36:07] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:36:07] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:36:07] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:36:07] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:40:15] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:15] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:40:15] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.04e039878eba497682bf7ab1ea006215'])>"])>
+[2026-03-28 13:40:15] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 35128, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:40:15] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:15] ERROR    [rabbitmq.consumer] Failed to setup queue: Channel is closing.
+[2026-03-28 13:40:15] ERROR    [rabbitmq.consumer] Unexpected error: Channel is closing.
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 215, in start
+    self.setup_queue()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 108, in setup_queue
+    self.channel.exchange_declare(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        exchange=config.RABBITMQ_EXCHANGE_NAME,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        exchange_type='topic',
+        ^^^^^^^^^^^^^^^^^^^^^^
+        durable=True
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 2395, in exchange_declare
+    self._impl.exchange_declare(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        exchange=exchange,
+        ^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        arguments=arguments,
+        ^^^^^^^^^^^^^^^^^^^^
+        callback=declare_ok_result.set_value_once)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 661, in exchange_declare
+    self._raise_if_not_open()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1399, in _raise_if_not_open
+    raise exceptions.ChannelWrongStateError('Channel is closing.')
+pika.exceptions.ChannelWrongStateError: Channel is closing.
+[2026-03-28 13:40:15] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:15] ERROR    [main] Error stopping RabbitMQ consumer: Stream connection lost: IndexError('pop from an empty deque')
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1539, in close
+    self._flush_output(lambda: self.is_closed)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+pika.exceptions.StreamLostError: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:40:15] INFO     [main] Service shutdown complete
+[2026-03-28 13:40:15] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:15] INFO     [models] Database connection test successful
+[2026-03-28 13:40:15] INFO     [main] Database connection verified
+[2026-03-28 13:40:15] INFO     [main] Database schema initialized
+[2026-03-28 13:40:15] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:40:15] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:40:15] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:40:15] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:40:15] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:40:15] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:40:18] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:18] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:40:18] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.8d70778c7c96401a97116fbeaf6c5374'])>"])>
+[2026-03-28 13:40:18] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 58002, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:40:18] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:18] ERROR    [rabbitmq.consumer] Failed to setup queue: Channel is closing.
+[2026-03-28 13:40:18] ERROR    [rabbitmq.consumer] Unexpected error: Channel is closing.
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 215, in start
+    self.setup_queue()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 108, in setup_queue
+    self.channel.exchange_declare(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        exchange=config.RABBITMQ_EXCHANGE_NAME,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        exchange_type='topic',
+        ^^^^^^^^^^^^^^^^^^^^^^
+        durable=True
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 2395, in exchange_declare
+    self._impl.exchange_declare(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        exchange=exchange,
+        ^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        arguments=arguments,
+        ^^^^^^^^^^^^^^^^^^^^
+        callback=declare_ok_result.set_value_once)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 661, in exchange_declare
+    self._raise_if_not_open()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1399, in _raise_if_not_open
+    raise exceptions.ChannelWrongStateError('Channel is closing.')
+pika.exceptions.ChannelWrongStateError: Channel is closing.
+[2026-03-28 13:40:18] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:18] ERROR    [main] Error stopping RabbitMQ consumer: Stream connection lost: IndexError('pop from an empty deque')
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1539, in close
+    self._flush_output(lambda: self.is_closed)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+pika.exceptions.StreamLostError: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:40:18] INFO     [main] Service shutdown complete
+[2026-03-28 13:40:19] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:19] INFO     [models] Database connection test successful
+[2026-03-28 13:40:19] INFO     [main] Database connection verified
+[2026-03-28 13:40:19] INFO     [main] Database schema initialized
+[2026-03-28 13:40:19] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:40:19] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:40:19] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:40:19] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:40:19] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:40:19] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:40:24] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:24] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:40:24] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 58014, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:40:24] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.4372a042e43b4114bf6d5f13f8d3ed53'])>"])>
+[2026-03-28 13:40:24] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:24] ERROR    [main] Error stopping RabbitMQ consumer: 'NoneType' object has no attribute 'write'
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1538, in close
+    self._impl.close(reply_code=reply_code, reply_text=reply_text)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 552, in close
+    self._rpc(spec.Channel.Close(reply_code, reply_text, 0, 0),
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              self._on_closeok, [spec.Channel.CloseOk])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1358, in _rpc
+    self._send_method(method)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1415, in _send_method
+    self.connection._send_method(self.channel_number, method, content)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2255, in _send_method
+    self._send_frame(frame.Method(channel_number, method))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2241, in _send_frame
+    self._output_marshaled_frames([marshaled_frame])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2332, in _output_marshaled_frames
+    self._adapter_emit_data(marshaled_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/base_connection.py", line 386, in _adapter_emit_data
+    self._transport.write(data)
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'write'
+[2026-03-28 13:40:24] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:40:24] INFO     [main] Service shutdown complete
+[2026-03-28 13:40:24] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:40:24] INFO     [models] Database connection test successful
+[2026-03-28 13:40:24] INFO     [main] Database connection verified
+[2026-03-28 13:40:25] INFO     [main] Database schema initialized
+[2026-03-28 13:40:25] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:40:25] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:40:25] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:40:25] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:40:25] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:40:25] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:41:09] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:09] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:41:09] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.afee3615fb564574ae9bbcf92bc9f33e'])>"])>
+[2026-03-28 13:41:09] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 52924, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:41:09] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:09] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:09] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:41:09] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:41:14] ERROR    [main] Error stopping RabbitMQ consumer: 'NoneType' object has no attribute 'clear'
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1539, in close
+    self._flush_output(lambda: self.is_closed)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 514, in _flush_output
+    self._impl.ioloop.poll()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 579, in poll
+    self._poller.poll()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 1203, in poll
+    self._dispatch_fd_events(fd_event_map)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 891, in _dispatch_fd_events
+    self._processing_fd_event_map.clear()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'clear'
+[2026-03-28 13:41:14] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:41:14] INFO     [main] Service shutdown complete
+[2026-03-28 13:41:15] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:15] INFO     [models] Database connection test successful
+[2026-03-28 13:41:15] INFO     [main] Database connection verified
+[2026-03-28 13:41:15] INFO     [main] Database schema initialized
+[2026-03-28 13:41:15] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:41:15] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:41:15] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:41:15] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:41:15] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:41:15] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:41:15] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:15] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:41:15] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=22, family=10, type=1, proto=6, laddr=('::1', 60868, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:41:15] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.861471a122c34efc8c092b3688ca147c'])>"])>
+[2026-03-28 13:41:15] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:15] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:15] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:15] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:41:15] ERROR    [main] Error stopping RabbitMQ consumer: Stream connection lost: IndexError('pop from an empty deque')
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 253, in stop
+    self.channel.stop_consuming()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1896, in stop_consuming
+    self._cancel_all_consumers()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1497, in _cancel_all_consumers
+    self.basic_cancel(consumer_tag)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1805, in basic_cancel
+    self._flush_output(
+    ~~~~~~~~~~~~~~~~~~^
+        cancel_ok_result.is_ready,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        lambda: consumer_tag not in self._impl._consumers)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 226, in start
+    self.channel.start_consuming()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1883, in start_consuming
+    self._process_data_events(time_limit=None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 2044, in _process_data_events
+    self.connection.process_data_events(time_limit=time_limit)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 842, in process_data_events
+    self._flush_output(common_terminator)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+pika.exceptions.StreamLostError: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:41:15] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:41:15] INFO     [main] Service shutdown complete
+[2026-03-28 13:41:16] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:16] INFO     [models] Database connection test successful
+[2026-03-28 13:41:16] INFO     [main] Database connection verified
+[2026-03-28 13:41:16] INFO     [main] Database schema initialized
+[2026-03-28 13:41:16] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:41:16] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:41:16] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:41:16] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:41:16] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:41:16] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:41:21] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:21] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:41:21] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 60872, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:41:21] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.2a66d530276f468ca59d801e52c2949e'])>"])>
+[2026-03-28 13:41:21] ERROR    [main] Error stopping RabbitMQ consumer: [Errno 17] File exists
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/selector_ioloop_adapter.py", line 319, in set_writer
+    callbacks = self._watchers[fd]
+                ~~~~~~~~~~~~~~^^^^
+KeyError: 23
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1538, in close
+    self._impl.close(reply_code=reply_code, reply_text=reply_text)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 552, in close
+    self._rpc(spec.Channel.Close(reply_code, reply_text, 0, 0),
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              self._on_closeok, [spec.Channel.CloseOk])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1358, in _rpc
+    self._send_method(method)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/channel.py", line 1415, in _send_method
+    self.connection._send_method(self.channel_number, method, content)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2255, in _send_method
+    self._send_frame(frame.Method(channel_number, method))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2241, in _send_frame
+    self._output_marshaled_frames([marshaled_frame])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/connection.py", line 2332, in _output_marshaled_frames
+    self._adapter_emit_data(marshaled_frame)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/base_connection.py", line 386, in _adapter_emit_data
+    self._transport.write(data)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1030, in write
+    self._nbio.set_writer(self._sock.fileno(), self._on_socket_writable)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/selector_ioloop_adapter.py", line 321, in set_writer
+    self._loop.add_handler(fd, self._on_reader_writer_fd_events,
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                           self._writable_mask)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 522, in add_handler
+    self._poller.add_handler(fd, handler, events)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 707, in add_handler
+    self._register_fd(fileno, events)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 1228, in _register_fd
+    self._poll.register(fileno, events)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+FileExistsError: [Errno 17] File exists
+[2026-03-28 13:41:21] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:21] INFO     [main] Service shutdown complete
+[2026-03-28 13:41:21] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:22] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:22] INFO     [models] Database connection test successful
+[2026-03-28 13:41:22] INFO     [main] Database connection verified
+[2026-03-28 13:41:22] INFO     [main] Database schema initialized
+[2026-03-28 13:41:22] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:41:22] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:41:22] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:41:22] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:41:22] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:41:22] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:41:27] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:27] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:41:27] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.809b847b639242b783c81221f15d0367'])>"])>
+[2026-03-28 13:41:27] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 60876, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:41:27] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 60876, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:41:27] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:27] ERROR    [pika.adapters.utils.io_services_utils] Wrapped func exited with exception. Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:41:27] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:41:27] ERROR    [pika.adapters.utils.io_services_utils] Wrapped func exited with exception. Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:41:27] ERROR    [main] Error stopping RabbitMQ consumer: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 819, in close
+    self._flush_output(self._closed_result.is_ready)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 514, in _flush_output
+    self._impl.ioloop.poll()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 579, in poll
+    self._poller.poll()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 1203, in poll
+    self._dispatch_fd_events(fd_event_map)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 907, in _dispatch_fd_events
+    handler(fileno, events)
+    ~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/selector_ioloop_adapter.py", line 394, in _on_reader_writer_fd_events
+    callbacks.writer()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:41:27] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:41:27] INFO     [main] Service shutdown complete
+[2026-03-28 13:41:28] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:41:28] INFO     [models] Database connection test successful
+[2026-03-28 13:41:28] INFO     [main] Database connection verified
+[2026-03-28 13:41:28] INFO     [main] Database schema initialized
+[2026-03-28 13:41:28] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:41:28] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:41:28] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:41:28] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:41:28] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:41:28] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:45:00] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:45:00] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:45:00] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 58802, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:45:00] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:45:00] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:45:00] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:45:00] ERROR    [main] Error stopping RabbitMQ consumer: Stream connection lost: IndexError('pop from an empty deque')
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 253, in stop
+    self.channel.stop_consuming()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1896, in stop_consuming
+    self._cancel_all_consumers()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1497, in _cancel_all_consumers
+    self.basic_cancel(consumer_tag)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1805, in basic_cancel
+    self._flush_output(
+    ~~~~~~~~~~~~~~~~~~^
+        cancel_ok_result.is_ready,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        lambda: consumer_tag not in self._impl._consumers)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+pika.exceptions.StreamLostError: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:45:00] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:45:00] INFO     [main] Service shutdown complete
+[2026-03-28 13:45:00] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:45:01] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:45:01] INFO     [models] Database connection test successful
+[2026-03-28 13:45:01] INFO     [main] Database connection verified
+[2026-03-28 13:45:01] INFO     [main] Database schema initialized
+[2026-03-28 13:45:01] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:45:01] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:45:01] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:45:01] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:45:01] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:45:01] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:45:08] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:45:08] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:45:08] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 33692, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:45:08] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:45:08] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:45:08] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:45:08] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:45:11] ERROR    [main] Error stopping RabbitMQ consumer: 'NoneType' object has no attribute 'clear'
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 253, in stop
+    self.channel.stop_consuming()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1896, in stop_consuming
+    self._cancel_all_consumers()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1497, in _cancel_all_consumers
+    self.basic_cancel(consumer_tag)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1805, in basic_cancel
+    self._flush_output(
+    ~~~~~~~~~~~~~~~~~~^
+        cancel_ok_result.is_ready,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        lambda: consumer_tag not in self._impl._consumers)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 514, in _flush_output
+    self._impl.ioloop.poll()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 579, in poll
+    self._poller.poll()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 1203, in poll
+    self._dispatch_fd_events(fd_event_map)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 891, in _dispatch_fd_events
+    self._processing_fd_event_map.clear()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'clear'
+[2026-03-28 13:45:11] INFO     [main] Service shutdown complete
+[2026-03-28 13:45:12] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:45:12] INFO     [models] Database connection test successful
+[2026-03-28 13:45:12] INFO     [main] Database connection verified
+[2026-03-28 13:45:12] INFO     [main] Database schema initialized
+[2026-03-28 13:45:12] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:45:12] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:45:12] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:45:12] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:45:12] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:45:12] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:49:55] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:49:55] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:49:55] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.116d5278261f40a88859e926a7361011'])>"])>
+[2026-03-28 13:49:55] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 37242, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:49:55] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 37242, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:49:55] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:49:55] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:49:55] ERROR    [pika.adapters.utils.io_services_utils] Wrapped func exited with exception. Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:49:55] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:49:55] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:49:55] ERROR    [pika.adapters.utils.io_services_utils] Wrapped func exited with exception. Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:49:55] ERROR    [main] Error stopping RabbitMQ consumer: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 819, in close
+    self._flush_output(self._closed_result.is_ready)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 514, in _flush_output
+    self._impl.ioloop.poll()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 579, in poll
+    self._poller.poll()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 1203, in poll
+    self._dispatch_fd_events(fd_event_map)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/select_connection.py", line 907, in _dispatch_fd_events
+    handler(fileno, events)
+    ~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/selector_ioloop_adapter.py", line 394, in _on_reader_writer_fd_events
+    callbacks.writer()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1114, in _on_socket_writable
+    self._initiate_abort(error)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/diagnostic_utils.py", line 53, in log_exception_func_wrap
+    return func(*args, **kwargs)
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 935, in _initiate_abort
+    assert self._state == self._STATE_ABORTED_BY_USER, (
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('_AsyncTransportBase._initate_abort() expected _STATE_ABORTED_BY_USER', 2)
+[2026-03-28 13:49:55] INFO     [main] Service shutdown complete
+[2026-03-28 13:49:56] INFO     [main] Starting EAFIT Bikes - Reservations Service...
+[2026-03-28 13:49:56] INFO     [models] Database connection test successful
+[2026-03-28 13:49:56] INFO     [main] Database connection verified
+[2026-03-28 13:49:56] INFO     [main] Database schema initialized
+[2026-03-28 13:49:56] INFO     [main] Initializing RabbitMQ consumer...
+[2026-03-28 13:49:56] INFO     [main] Service startup complete - ready to receive requests
+[2026-03-28 13:49:56] INFO     [rabbitmq.consumer] Connected to RabbitMQ at localhost:5672
+[2026-03-28 13:49:56] INFO     [main] RabbitMQ connected and consumer started
+[2026-03-28 13:49:56] INFO     [rabbitmq.consumer] Queue setup complete: 'bike_created_events' <- 'bike_service' (routing: bike.created, bike.deleted)
+[2026-03-28 13:49:56] INFO     [rabbitmq.consumer] Started consuming from queue 'bike_created_events'
+[2026-03-28 13:50:13] INFO     [rabbitmq.consumer] Received message: bike_id='550e8400-e29b-41d4-a716-446655441111' event='bike.created'
+[2026-03-28 13:50:13] INFO     [rabbitmq.consumer] Processing bike_deleted event for bike_id='550e8400-e29b-41d4-a716-446655441111'
+[2026-03-28 13:50:13] INFO     [services.bike_events] Processing bike.deleted event | bike_id='550e8400-e29b-41d4-a716-446655441111'
+[2026-03-28 13:50:13] INFO     [services.bike_events] Bike deleted | bike_id='550e8400-e29b-41d4-a716-446655441111' | Reservation history preserved
+[2026-03-28 13:50:13] INFO     [rabbitmq.consumer] Event processed successfully: Bike '550e8400-e29b-41d4-a716-446655441111' deleted. Reservation history preserved.
+[2026-03-28 13:50:13] INFO     [rabbitmq.consumer] Message acknowledged: bike_id='550e8400-e29b-41d4-a716-446655441111'
+[2026-03-28 13:50:33] INFO     [main] Shutting down EAFIT Bikes - Reservations Service...
+[2026-03-28 13:50:33] INFO     [main] Stopping RabbitMQ consumer...
+[2026-03-28 13:50:33] ERROR    [pika.adapters.utils.io_services_utils] _AsyncBaseTransport._produce() failed, aborting connection: error=IndexError('pop from an empty deque'); sock=<socket.socket fd=23, family=10, type=1, proto=6, laddr=('::1', 38110, 0, 0), raddr=('::1', 5672, 0, 0)>; Caller's stack:
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 1103, in _on_socket_writable
+    self._produce()
+    ~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/utils/io_services_utils.py", line 822, in _produce
+    chunk = self._tx_buffers.popleft()
+IndexError: pop from an empty deque
+[2026-03-28 13:50:33] ERROR    [pika.channel] Unexpected frame: <METHOD(['channel_number=1', 'frame_type=1', "method=<Basic.CancelOk(['consumer_tag=ctag1.5e884ebbcd0d459798902bb56149689c'])>"])>
+[2026-03-28 13:50:33] ERROR    [pika.adapters.base_connection] connection_lost: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:50:33] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:50:33] ERROR    [pika.adapters.blocking_connection] Unexpected connection close detected: StreamLostError: ("Stream connection lost: IndexError('pop from an empty deque')",)
+[2026-03-28 13:50:33] WARNING  [rabbitmq.consumer] Connection lost: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:50:33] ERROR    [main] Error stopping RabbitMQ consumer: Stream connection lost: IndexError('pop from an empty deque')
+Traceback (most recent call last):
+  File "/home/juan/University/EAFIT-Bikes/reservations/main.py", line 42, in stop_rabbitmq_consumer
+    rabbitmq_consumer.stop()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 255, in stop
+    self.connection.close()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 809, in close
+    channel.close(reply_code, reply_text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1539, in close
+    self._flush_output(lambda: self.is_closed)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1353, in _flush_output
+    self._connection._flush_output(lambda: self.is_closed, *waiters)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/rabbitmq/consumer.py", line 226, in start
+    self.channel.start_consuming()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 1883, in start_consuming
+    self._process_data_events(time_limit=None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 2044, in _process_data_events
+    self.connection.process_data_events(time_limit=time_limit)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 842, in process_data_events
+    self._flush_output(common_terminator)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+  File "/home/juan/University/EAFIT-Bikes/reservations/venv/lib/python3.13/site-packages/pika/adapters/blocking_connection.py", line 523, in _flush_output
+    raise self._closed_result.value.error
+pika.exceptions.StreamLostError: Stream connection lost: IndexError('pop from an empty deque')
+[2026-03-28 13:50:33] INFO     [rabbitmq.consumer] Reconnecting... (1/5)
+[2026-03-28 13:50:33] INFO     [main] Service shutdown complete

@@ -1,230 +1,436 @@
-# EAFIT Bikes - Reservations Microservice
+# EAFIT Bikes - Reservations Service
 
-A FastAPI-based microservice for managing bicycle reservations with PostgreSQL.
+Microservicio de reservaciones de bicicletas para EAFIT Bikes. Permite crear, consultar y actualizar reservaciones de bicicletas con validación automática de conflictos de horarios.
 
-## Setup
+## Características
 
-### Prerequisites
-- Docker & Docker Compose, OR
-- Python 3.13+
-- PostgreSQL 12+ (running locally)
-- RabbitMQ (running locally)
-- pip/venv
+- **Multi-reservas por bicicleta**: Una bicicleta puede tener múltiples reservas en diferentes rangos de tiempo
+- **Gestión de conflictos**: Validación automática de conflictos de horarios
+- **Eventos RabbitMQ**: Integración con RabbitMQ para eventos de creación/eliminación de bicicletas
+- **Base de datos PostgreSQL**: Persistencia de datos de reservas y bicicletas
 
-### Quick Start with Docker
+## Endpoints
 
-1. **Configure Environment**
-```bash
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
-```
+### Documentación de Endpoints
 
-2. **Build and Run**
-```bash
-docker build -t eafit-bikes-reservations .
-docker run -p 8000:8000 \
-  --env-file .env \
-  --network host \
-  eafit-bikes-reservations
-```
-
-### Local Development Setup
-
-1. **Create Virtual Environment**
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-2. **Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-3. **Environment Configuration**
-```bash
-cp .env.example .env
-# Edit .env with your database credentials:
-# DATABASE_URL=postgresql://user:password@localhost:5432/eafit_bikes
-# RABBITMQ_HOST=localhost
-```
-
-## Database Setup
-
-The database schema is automatically created when the application starts. The service uses SQLAlchemy ORM to manage the database.
-
-### Schema
-- **reservations** table with indexes on `bike_id` and `user_id` for optimal query performance
-
-For detailed schema documentation, see [DATABASE.md](./DATABASE.md)
-
-## Running the Application
-
-**Option 1: Python (Development)**
-```bash
-source venv/bin/activate
-python main.py
-```
-
-**Option 2: Uvicorn with Reload**
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-**Option 3: Docker**
-```bash
-docker build -t eafit-bikes-reservations .
-docker run -p 8000:8000 --env-file .env --network host eafit-bikes-reservations
-```
-
-The API will be available at `http://localhost:8000`
-
-### Health Check
-```bash
-curl http://localhost:8000/health
-# Expected response: {"status":"healthy","service":"reservations"}
-```
-
-## API Documentation
-
-Once the server is running, interactive API documentation is available at:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-## Project Structure
+#### **1. Obtener todas las bicicletas**
 
 ```
-reservations/
-├── config/
-│   ├── __init__.py
-│   └── config.py           # Configuration & environment variables
-├── models/
-│   ├── __init__.py
-│   └── reservations.py     # SQLAlchemy ORM models
-├── schemas/
-│   ├── __init__.py
-│   └── reservations.py     # Pydantic request/response schemas
-├── repositories/
-│   ├── __init__.py
-│   └── reservations.py     # Data access layer
-├── services/
-│   ├── __init__.py
-│   └── reservations.py     # Business logic layer
-├── routes/
-│   ├── __init__.py
-│   └── reservations.py     # API endpoints
-├── main.py                 # FastAPI application entry point
-├── requirements.txt        # Python dependencies
-├── Dockerfile             # Docker container configuration
-├── .env.example           # Environment variables template
-├── DATABASE.md            # Database documentation
-└── README.md              # This file
+GET /bikes
 ```
 
-## API Endpoints
+**Descripción**: Retorna la lista de todas las bicicletas registradas en el sistema.
 
-### Reservations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/reservations/` | Create a new reservation |
-| GET | `/reservations/` | Get all reservations |
-| GET | `/reservations/{reservation_id}` | Get a specific reservation |
-| GET | `/reservations/bike/{bike_id}` | Get all reservations for a bike |
-| GET | `/reservations/user/{user_id}` | Get all reservations for a user |
-| GET | `/reservations/active/all` | Get all active reservations |
-| PUT | `/reservations/{reservation_id}` | Update a reservation |
-| DELETE | `/reservations/{reservation_id}` | Cancel a reservation |
-
-### Request/Response Example
-
-**Create Reservation:**
-```bash
-curl -X POST http://localhost:8000/reservations/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "bike_id": "bike-123",
-    "user_id": "user-456",
-    "start_date": "2024-03-25T10:00:00",
-    "end_date": "2024-03-25T12:00:00",
-    "status": "active"
-  }'
+**Response (200 OK)**:
+```json
+[
+  {
+    "bike_id": "bike-12345",
+    "created_at": "2025-01-15T10:00:00Z",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+]
 ```
 
-**Response:**
+---
+
+#### **2. Crear una reserva**
+
+```
+POST /reservations
+```
+
+**Descripción**: Crea una nueva reserva para una bicicleta en un rango de fechas específico. El sistema valida automáticamente que:
+- La bicicleta exista
+- No haya conflictos de horarios con otras reservas
+
+**Request Payload**:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "bike_id": "bike-123",
-  "user_id": "user-456",
-  "start_date": "2024-03-25T10:00:00",
-  "end_date": "2024-03-25T12:00:00",
-  "status": "active",
-  "created_at": "2024-03-24T19:05:00",
-  "updated_at": "2024-03-24T19:05:00"
+  "bike_id": "bike-12345",
+  "user_id": "user-67890",
+  "start_date": "2025-01-15T10:00:00Z",
+  "end_date": "2025-01-15T14:00:00Z"
 }
 ```
 
-## Architecture
+**Parameter Details**:
+- `bike_id` (string, required): Identificador único de la bicicleta
+- `user_id` (string, required): Identificador único del usuario
+- `start_date` (datetime ISO 8601, required): Fecha y hora de inicio en UTC
+- `end_date` (datetime ISO 8601, required): Fecha y hora de fin en UTC (debe ser posterior a start_date)
 
-The service follows a clean architecture pattern:
-
-1. **Routes** - FastAPI endpoints
-2. **Schemas** - Pydantic models for validation
-3. **Services** - Business logic
-4. **Repositories** - Data access operations
-5. **Models** - SQLAlchemy ORM definitions
-6. **Config** - Configuration management
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `postgresql://user:password@localhost:5432/eafit_bikes` | PostgreSQL connection string |
-| `RABBITMQ_HOST` | `localhost` | RabbitMQ broker hostname |
-| `RABBITMQ_PORT` | `5672` | RabbitMQ broker port |
-| `RABBITMQ_USER` | `guest` | RabbitMQ username |
-| `RABBITMQ_PASSWORD` | `guest` | RabbitMQ password |
-| `DEBUG` | `False` | Enable debug mode |
-
-## Development
-
-### Code Style
-The project follows PEP 8 conventions. Ensure code is properly formatted.
-
-### Adding New Features
-1. Create the SQLAlchemy model in `models/`
-2. Create Pydantic schemas in `schemas/`
-3. Implement repository operations in `repositories/`
-4. Add business logic in `services/`
-5. Expose endpoints in `routes/`
-
-## Troubleshooting
-
-### Database Connection Issues
-- Verify PostgreSQL is running on localhost:5432
-- Check `DATABASE_URL` in `.env` file
-- Ensure database credentials are correct
-
-### RabbitMQ Connection Issues
-- Verify RabbitMQ is running on localhost:5672
-- Check `RABBITMQ_*` environment variables in `.env`
-
-### Port Already in Use
-Default port is 8000. Change it in the docker run command or when running locally:
-```bash
-# Local: uvicorn automatically finds an available port with --reload
-uvicorn main:app --reload --port 8001
-
-# Docker: change port mapping
-docker run -p 8001:8000 eafit-bikes-reservations
+**Response (201 CREATED)**:
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "bike_id": "bike-12345",
+  "user_id": "user-67890",
+  "start_date": "2025-01-15T10:00:00Z",
+  "end_date": "2025-01-15T14:00:00Z",
+  "created_at": "2025-01-15T10:00:00Z",
+  "updated_at": "2025-01-15T10:00:00Z"
+}
 ```
 
-### Import Errors
-If you get import errors, ensure:
-1. Virtual environment is activated: `source venv/bin/activate`
-2. Dependencies are installed: `pip install -r requirements.txt`
-3. Python path includes the project root
+**Response (409 CONFLICT)** - Si hay conflicto de horarios:
+```json
+{
+  "status": "conflict",
+  "message": "The bike 'bike-12345' has 1 conflicting reservation(s) in the requested date range.",
+  "bike_id": "bike-12345",
+  "requested_start": "2025-01-15T10:00:00Z",
+  "requested_end": "2025-01-15T14:00:00Z",
+  "conflicting_reservations": [
+    {
+      "id": "2b75aa9e-5816-4653-848d-eb94e66a1af4",
+      "bike_id": "bike-12345",
+      "user_id": "user-11111",
+      "start_date": "2025-01-15T12:00:00Z",
+      "end_date": "2025-01-15T16:00:00Z",
+      "created_at": "2025-01-15T09:00:00Z",
+      "updated_at": "2025-01-15T09:00:00Z"
+    }
+  ]
+}
+```
 
-## License
-See LICENSE file in the root directory.
+**Response (422 UNPROCESSABLE ENTITY)** - Si la bicicleta no existe o validación falla:
+```json
+{
+  "detail": "Bike with ID 'bike-invalid' is not registered in the system. Please register the bike first."
+}
+```
+
+---
+
+#### **3. Obtener una reserva por ID**
+
+```
+GET /reservations/{reservation_id}
+```
+
+**Descripción**: Obtiene los detalles de una reserva específica.
+
+**Path Parameters**:
+- `reservation_id` (UUID, required): Identificador único de la reserva
+
+**Response (200 OK)**:
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "bike_id": "bike-12345",
+  "user_id": "user-67890",
+  "start_date": "2025-01-15T10:00:00Z",
+  "end_date": "2025-01-15T14:00:00Z",
+  "created_at": "2025-01-15T10:00:00Z",
+  "updated_at": "2025-01-15T10:00:00Z"
+}
+```
+
+**Response (404 NOT FOUND)**:
+```json
+{
+  "detail": "Reservation not found"
+}
+```
+
+---
+
+#### **4. Obtener todas las reservas de una bicicleta**
+
+```
+GET /reservations/bike/{bike_id}
+```
+
+**Descripción**: Retorna todas las reservas para una bicicleta específica.
+
+**Path Parameters**:
+- `bike_id` (string, required): Identificador de la bicicleta
+
+**Response (200 OK)**:
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "bike_id": "bike-12345",
+    "user_id": "user-67890",
+    "start_date": "2025-01-15T10:00:00Z",
+    "end_date": "2025-01-15T14:00:00Z",
+    "created_at": "2025-01-15T10:00:00Z",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+#### **5. Obtener todas las reservas de un usuario**
+
+```
+GET /reservations/user/{user_id}
+```
+
+**Descripción**: Retorna todas las reservas hechas por un usuario específico.
+
+**Path Parameters**:
+- `user_id` (string, required): Identificador del usuario
+
+**Response (200 OK)**:
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "bike_id": "bike-12345",
+    "user_id": "user-67890",
+    "start_date": "2025-01-15T10:00:00Z",
+    "end_date": "2025-01-15T14:00:00Z",
+    "created_at": "2025-01-15T10:00:00Z",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+#### **6. Obtener todas las reservas**
+
+```
+GET /reservations
+```
+
+**Descripción**: Retorna todas las reservas del sistema.
+
+**Response (200 OK)**:
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "bike_id": "bike-12345",
+    "user_id": "user-67890",
+    "start_date": "2025-01-15T10:00:00Z",
+    "end_date": "2025-01-15T14:00:00Z",
+    "created_at": "2025-01-15T10:00:00Z",
+    "updated_at": "2025-01-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+#### **7. Actualizar una reserva**
+
+```
+PUT /reservations/{reservation_id}
+```
+
+**Descripción**: Actualiza el rango de fechas de una reserva existente. Se valida automáticamente que no haya conflictos con otras reservas.
+
+**Path Parameters**:
+- `reservation_id` (UUID, required): Identificador de la reserva a actualizar
+
+**Request Payload** (todos los campos opcionales):
+```json
+{
+  "start_date": "2025-01-16T10:00:00Z",
+  "end_date": "2025-01-16T14:00:00Z"
+}
+```
+
+**Parameter Details**:
+- `start_date` (datetime ISO 8601, optional): Nueva fecha y hora de inicio
+- `end_date` (datetime ISO 8601, optional): Nueva fecha y hora de fin
+
+**Response (200 OK)**:
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "bike_id": "bike-12345",
+  "user_id": "user-67890",
+  "start_date": "2025-01-16T10:00:00Z",
+  "end_date": "2025-01-16T14:00:00Z",
+  "created_at": "2025-01-15T10:00:00Z",
+  "updated_at": "2025-01-16T09:30:00Z"
+}
+```
+
+**Response (409 CONFLICT)** - Si hay conflicto con otras reservas:
+```json
+{
+  "status": "conflict",
+  "message": "The bike 'bike-12345' has 1 conflicting reservation(s) in the requested date range.",
+  "bike_id": "bike-12345",
+  "requested_start": "2025-01-16T10:00:00Z",
+  "requested_end": "2025-01-16T14:00:00Z",
+  "conflicting_reservations": [
+    {
+      "id": "11017702-8478-4735-b5cc-280e7e845628",
+      "bike_id": "bike-12345",
+      "user_id": "user-11111",
+      "start_date": "2025-01-16T11:00:00Z",
+      "end_date": "2025-01-16T15:00:00Z",
+      "created_at": "2025-01-16T08:00:00Z",
+      "updated_at": "2025-01-16T08:00:00Z"
+    }
+  ]
+}
+```
+
+**Response (404 NOT FOUND)** - Si la reserva no existe:
+```json
+{
+  "detail": "Reservation with ID 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' not found"
+}
+```
+
+**Response (422 UNPROCESSABLE ENTITY)** - Si la validación falla:
+```json
+{
+  "detail": "Cannot update reservation. The new date range conflicts with 1 existing reservation(s)."
+}
+```
+
+---
+
+## Modelos de Datos
+
+### BikeResponse
+```json
+{
+  "bike_id": "string (min 1 char)",
+  "created_at": "datetime (ISO 8601 UTC)",
+  "updated_at": "datetime (ISO 8601 UTC)"
+}
+```
+
+### ReservationResponse
+```json
+{
+  "id": "UUID",
+  "bike_id": "string (min 1 char)",
+  "user_id": "string (min 1 char)",
+  "start_date": "datetime (ISO 8601 UTC)",
+  "end_date": "datetime (ISO 8601 UTC)",
+  "created_at": "datetime (ISO 8601 UTC)",
+  "updated_at": "datetime (ISO 8601 UTC)"
+}
+```
+
+### ConflictResponse
+```json
+{
+  "status": "conflict",
+  "message": "string",
+  "bike_id": "string",
+  "requested_start": "datetime (ISO 8601 UTC)",
+  "requested_end": "datetime (ISO 8601 UTC)",
+  "conflicting_reservations": [
+    {
+      "id": "UUID",
+      "bike_id": "string",
+      "user_id": "string",
+      "start_date": "datetime (ISO 8601 UTC)",
+      "end_date": "datetime (ISO 8601 UTC)",
+      "created_at": "datetime (ISO 8601 UTC)",
+      "updated_at": "datetime (ISO 8601 UTC)"
+    }
+  ]
+}
+```
+
+---
+
+## Códigos de Estado HTTP
+
+| Código | Descripción |
+|--------|-------------|
+| `200` | OK - Solicitud exitosa |
+| `201` | CREATED - Recurso creado exitosamente |
+| `404` | NOT FOUND - Recurso no encontrado |
+| `409` | CONFLICT - Conflicto de horarios encontrado |
+| `422` | UNPROCESSABLE ENTITY - Error de validación |
+
+---
+
+## Notas Importantes
+
+### Gestión de Bicicletas
+- Las bicicletas se crean y eliminan únicamente a través de eventos RabbitMQ (`bike.created`, `bike.deleted`)
+- No hay endpoints HTTP de creación o eliminación de bicicletas
+- GET /bikes es el único endpoint disponible para bicicletas
+
+### Gestión de Reservas
+- Las reservas **no pueden ser eliminadas** a través de la API HTTP
+- Solo pueden ser creadas, consultadas y actualizadas
+- La eliminación de una bicicleta a través de RabbitMQ **preserva el historial de reservas**
+
+### Validación de Conflictos
+- Un conflicto existe cuando dos rangos de tiempo se solapan: `existing.start < new.end AND existing.end > new.start`
+- Al actualizar una reserva, se validan todas las otras reservas de la misma bicicleta
+- Se incluyen detalles completos de las reservas conflictivas en la respuesta
+
+### Zonas Horarias
+- Todas las fechas y horas deben estar en formato ISO 8601 UTC
+- En desarrollo, la variable de entorno `ASSUME_LOCAL_TZ` puede configurarse para usar una zona horaria local (ej: "America/Bogota")
+- En producción, se asume UTC
+
+---
+
+## Ejemplos de Uso
+
+### Crear una Reserva
+
+```bash
+curl -X POST http://localhost:8000/reservations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bike_id": "bike-12345",
+    "user_id": "user-67890",
+    "start_date": "2025-01-15T10:00:00Z",
+    "end_date": "2025-01-15T14:00:00Z"
+  }'
+```
+
+### Actualizar una Reserva
+
+```bash
+curl -X PUT http://localhost:8000/reservations/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_date": "2025-01-16T10:00:00Z",
+    "end_date": "2025-01-16T14:00:00Z"
+  }'
+```
+
+### Obtener Reservas de una Bicicleta
+
+```bash
+curl http://localhost:8000/reservations/bike/bike-12345
+```
+
+---
+
+## Configuración
+
+### Variables de Entorno
+
+- `DATABASE_URL`: Conexión a PostgreSQL (requerido)
+- `RABBITMQ_URL`: Conexión a RabbitMQ (requerido)
+- `ASSUME_LOCAL_TZ`: Zona horaria para desarrollo (opcional, ej: "America/Bogota")
+
+---
+
+## Base de Datos
+
+### Tablas Principales
+
+- **bikes**: Registro de bicicletas activas
+- **reservations**: Historial de reservas
+
+### Migraciones
+
+Las migraciones se gestionan con Alembic. Para aplicarlas:
+
+```bash
+alembic upgrade head
+```

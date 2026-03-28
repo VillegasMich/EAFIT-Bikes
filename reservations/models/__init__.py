@@ -56,7 +56,7 @@ def test_database_connection() -> bool:
 
 
 # Import models to ensure they are registered with Base
-from models.reservations import Reservation
+from models.reservations import Bike, Reservation
 
 __all__ = [
     'engine',
@@ -64,5 +64,6 @@ __all__ = [
     'SessionLocal',
     'get_db',
     'test_database_connection',
+    'Bike',
     'Reservation'
 ]

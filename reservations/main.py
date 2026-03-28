@@ -4,7 +4,6 @@ from models import engine, Base, test_database_connection
 from config.config import config
 from config.logging import configure_logging
 from rabbitmq.consumer import RabbitMQConsumer
-from tasks.scheduler import start_scheduler, stop_scheduler
 from contextlib import asynccontextmanager
 import logging
 import threading
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 # Global instances
 rabbitmq_consumer = None
 consumer_thread = None
-scheduler = None
 
 
 def start_rabbitmq_consumer():
@@ -49,7 +47,7 @@ def stop_rabbitmq_consumer():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown logic for the FastAPI application"""
-    global consumer_thread, scheduler
+    global consumer_thread
     
     # Startup
     logger.info("Starting EAFIT Bikes - Reservations Service...")
@@ -65,12 +63,6 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     logger.info("Database schema initialized")
     
-    # Start background scheduler for maintenance tasks
-    try:
-        scheduler = start_scheduler()
-    except Exception as e:
-        logger.error(f"Failed to start background scheduler: {e}", exc_info=True)
-    
     # Start RabbitMQ consumer in a separate thread
     consumer_thread = threading.Thread(target=start_rabbitmq_consumer, daemon=True)
     consumer_thread.start()
@@ -81,8 +73,6 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down EAFIT Bikes - Reservations Service...")
     stop_rabbitmq_consumer()
-    if scheduler:
-        stop_scheduler(scheduler)
     engine.dispose()
     logger.info("Service shutdown complete")
 

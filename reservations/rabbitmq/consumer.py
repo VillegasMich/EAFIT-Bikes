@@ -6,7 +6,7 @@ import asyncio
 from typing import Callable
 from config.config import config
 from models import SessionLocal
-from services.bike_events import handle_bike_created_event, validate_bike_event
+from services.bike_events import handle_bike_created_event, handle_bike_deleted_event, validate_bike_event
 
 logger = logging.getLogger(__name__)
 
@@ -43,17 +43,20 @@ class RabbitMQConsumer:
             logger.error(f"Invalid bike event - missing required fields: {message}")
             raise ValueError(f"Invalid bike event: missing required fields")
         
-        # Extract bike_id from event
+        # Extract bike_id and event type from event
         bike_id = message.get("bike_id")
-        event_type = message.get("event_type", "bike.created")
+        event_type = message.get("event", "bike_created")
         
         logger.info(f"Processing {event_type} event for bike_id='{bike_id}'")
         logger.debug(f"Full event data: {message}")
         
-        # Get database session and process event
         db_session = SessionLocal()
         try:
-            result = asyncio.run(handle_bike_created_event(bike_id, db_session))
+            if event_type == "bike_deleted":
+                result = asyncio.run(handle_bike_deleted_event(bike_id, db_session))
+            else:
+                result = asyncio.run(handle_bike_created_event(bike_id, db_session))
+            
             logger.info(f"Event processed successfully: {result['message']}")
         except Exception as e:
             logger.error(f"Error processing bike event: {e}", exc_info=True)
@@ -113,15 +116,23 @@ class RabbitMQConsumer:
                 durable=True
             )
             
+            # Bind to bike.created events
             self.channel.queue_bind(
                 exchange=config.RABBITMQ_EXCHANGE_NAME,
                 queue=config.RABBITMQ_QUEUE_NAME,
                 routing_key='bike.created'
             )
             
+            # Bind to bike.deleted events
+            self.channel.queue_bind(
+                exchange=config.RABBITMQ_EXCHANGE_NAME,
+                queue=config.RABBITMQ_QUEUE_NAME,
+                routing_key='bike.deleted'
+            )
+            
             logger.info(
                 f"Queue setup complete: '{config.RABBITMQ_QUEUE_NAME}' "
-                f"<- '{config.RABBITMQ_EXCHANGE_NAME}' (routing: bike.created)"
+                f"<- '{config.RABBITMQ_EXCHANGE_NAME}' (routing: bike.created, bike.deleted)"
             )
         except Exception as e:
             logger.error(f"Failed to setup queue: {e}")

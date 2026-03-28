@@ -77,17 +77,6 @@ def update_reservation(
     return updated
 
 
-@router.delete("/{reservation_id}", status_code=204)
-def delete_reservation(
-    reservation_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Delete a reservation"""
-    service = ReservationService(db)
-    if not service.delete_reservation(reservation_id):
-        raise HTTPException(status_code=404, detail="Reservation not found")
-
-
 @router.get("/active/all", response_model=list[ReservationResponse])
 def get_active_reservations(
     db: Session = Depends(get_db)

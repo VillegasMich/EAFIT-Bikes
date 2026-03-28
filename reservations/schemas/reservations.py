@@ -90,17 +90,12 @@ class ReservationCreate(BaseModel):
 
 
 class ReservationUpdate(BaseModel):
-    """Schema for updating a reservation"""
-    status: Optional[str] = Field(
-        None,
-        description="Status of the reservation (e.g., 'available', 'reserved')",
-        example="reserved"
-    )
-    user_id: Optional[str] = Field(
-        None,
-        description="Unique identifier for the user",
-        example="user-67890"
-    )
+    """Schema for updating a reservation
+    
+    Only allows two operations:
+    1. Update dates: start_date and/or end_date (for existing reservations)
+    2. Cancel reservation: by sending status='available' to return bike to available pool
+    """
     start_date: Optional[datetime] = Field(
         None,
         description="Updated start date and time (UTC)",
@@ -110,6 +105,11 @@ class ReservationUpdate(BaseModel):
         None,
         description="Updated end date and time (UTC)",
         example="2025-01-15T14:00:00Z"
+    )
+    status: Optional[str] = Field(
+        None,
+        description="Updated status - 'available' to cancel/release the reservation",
+        example="available"
     )
 
     @field_validator('start_date', 'end_date', mode='before')

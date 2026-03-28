@@ -50,16 +50,6 @@ class ReservationRepository:
         return db_reservation
 
     @staticmethod
-    def delete(db: Session, reservation_id: UUID) -> bool:
-        """Delete a reservation"""
-        db_reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
-        if db_reservation:
-            db.delete(db_reservation)
-            db.commit()
-            return True
-        return False
-
-    @staticmethod
     def bike_exists(db: Session, bike_id: str) -> bool:
         """Check if a bike exists in the system"""
         return db.query(Reservation).filter(Reservation.bike_id == bike_id).first() is not None

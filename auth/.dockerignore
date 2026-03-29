@@ -1,0 +1,21 @@
+# dependencies
+node_modules
+npm-debug.log*
+
+# next
+.next
+out
+
+# git / IDE
+.git
+.gitignore
+.cursor
+*.md
+
+# env
+.env
+.env.*
+!.env.example
+
+# k8s manifests (not needed inside the image)
+k8s

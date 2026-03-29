@@ -44,7 +44,7 @@ class RabbitMQConsumer:
             raise ValueError(f"Invalid bike event: missing required fields")
         
         # Extract bike_id and event type from event
-        bike_id = message.get("bike_id")
+        bike_id = str(message.get("bike_id")) if message.get("bike_id") is not None else None
         event_type = message.get("event", "bike_created")
         
         logger.info(f"Processing {event_type} event for bike_id='{bike_id}'")

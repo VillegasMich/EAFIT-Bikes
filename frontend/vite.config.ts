@@ -22,6 +22,10 @@ export default defineConfig({
           }
         },
       },
+      '/reservations': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
     },
   },
 })

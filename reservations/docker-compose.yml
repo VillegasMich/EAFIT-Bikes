@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: eafit_bikes
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d eafit_bikes"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  reservations:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/eafit_bikes
+      RABBITMQ_HOST: host.docker.internal
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin123
+      RABBITMQ_VHOST: /
+      RABBITMQ_QUEUE_NAME: bike_events
+      RABBITMQ_EXCHANGE_NAME: bike_service
+      DEBUG: "False"
+      PORT: 8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

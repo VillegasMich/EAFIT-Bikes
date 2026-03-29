@@ -38,6 +38,7 @@ class Config:
     
     # Application Settings
     DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+    PORT = int(os.getenv("PORT", "8000"))
     APP_NAME = "EAFIT Bikes - Reservations Service"
     VERSION = "1.0.0"
     

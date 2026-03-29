@@ -1,5 +1,9 @@
 import * as admin from "firebase-admin";
 
+/**
+ * Verifies Firebase ID tokens from clients. The Web SDK (frontend) only supplies
+ * public config; validating JWTs requires the Admin SDK + service account here.
+ */
 export async function verifyFirebaseIdToken(idToken: string) {
   if (!admin.apps.length) {
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;

@@ -2,7 +2,7 @@ import { getUserTableConfig } from "@/lib/supabase/user-table-config";
 
 /**
  * Logical shape of a user profile row in Supabase (Firebase uid + app fields).
- * Default DB columns: `id` (Firebase uid), `role`, optional `email` — change with SUPABASE_USER_*_COLUMN.
+ * DB columns: `id` (Firebase uid), `role`, optional `email` — see `user-table-config.ts`.
  */
 export type ProfileRow = {
   id: string;

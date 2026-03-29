@@ -3,16 +3,19 @@ import json
 import os
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://admin:admin123@localhost:5672/")
+EXCHANGE_NAME = "bike_service"
 
 def publish_event(event: str, bike_id: int):
     try:
         connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
         channel = connection.channel()
-        channel.queue_declare(queue="bike_events", durable=True)
+        channel.exchange_declare(exchange=EXCHANGE_NAME, exchange_type="topic", durable=True)
+        # bike_created -> bike.created, bike_deleted -> bike.deleted
+        routing_key = "bike." + event.removeprefix("bike_")
         message = json.dumps({"event": event, "bike_id": bike_id})
         channel.basic_publish(
-            exchange="",
-            routing_key="bike_events",
+            exchange=EXCHANGE_NAME,
+            routing_key=routing_key,
             body=message,
             properties=pika.BasicProperties(delivery_mode=2)
         )

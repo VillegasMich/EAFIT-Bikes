@@ -1,14 +1,19 @@
 use futures_lite::StreamExt;
 use lapin::{
     Connection, ConnectionProperties,
-    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, QueueDeclareOptions},
+    options::{
+        BasicAckOptions, BasicConsumeOptions, BasicNackOptions, ExchangeDeclareOptions,
+        QueueBindOptions, QueueDeclareOptions,
+    },
     types::FieldTable,
+    ExchangeKind,
 };
 use serde::Deserialize;
 use sqlx::PgPool;
 use tracing::{error, info, warn};
 
-const QUEUE_NAME: &str = "bike_events";
+const EXCHANGE_NAME: &str = "bike_service";
+const QUEUE_NAME: &str = "geolocalization_bike_events";
 
 /// Default location: EAFIT University, Medellin, Colombia.
 const DEFAULT_LAT: f64 = 6.2006;
@@ -67,6 +72,22 @@ pub async fn start_consumer(pool: PgPool) {
     };
 
     if let Err(e) = channel
+        .exchange_declare(
+            EXCHANGE_NAME,
+            ExchangeKind::Topic,
+            ExchangeDeclareOptions {
+                durable: true,
+                ..Default::default()
+            },
+            FieldTable::default(),
+        )
+        .await
+    {
+        warn!("Could not declare exchange {EXCHANGE_NAME}: {e}");
+        return;
+    }
+
+    if let Err(e) = channel
         .queue_declare(
             QUEUE_NAME,
             QueueDeclareOptions {
@@ -78,6 +99,20 @@ pub async fn start_consumer(pool: PgPool) {
         .await
     {
         warn!("Could not declare queue {QUEUE_NAME}: {e}");
+        return;
+    }
+
+    if let Err(e) = channel
+        .queue_bind(
+            QUEUE_NAME,
+            EXCHANGE_NAME,
+            "bike.*",
+            QueueBindOptions::default(),
+            FieldTable::default(),
+        )
+        .await
+    {
+        warn!("Could not bind queue {QUEUE_NAME} to exchange {EXCHANGE_NAME}: {e}");
         return;
     }
 

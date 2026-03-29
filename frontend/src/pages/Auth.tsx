@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { syncAuthWithBackend, checkBackendHealth } from "../api/auth";
+import { login, register, checkBackendHealth } from "../api/auth";
 import { getFirebaseAuth, isFirebaseConfigured } from "../firebase/config";
 
 function firebaseErrorMessage(code: string): string {
@@ -77,7 +77,7 @@ export default function Auth() {
         console.log("cred", cred);
         const idToken = await cred.user.getIdToken();
         console.log("idToken", idToken);
-        await syncAuthWithBackend("register", idToken, role);
+        await register(idToken, role);
       } else {
         const cred = await signInWithEmailAndPassword(
           auth,
@@ -85,7 +85,7 @@ export default function Auth() {
           password
         );
         const idToken = await cred.user.getIdToken();
-        await syncAuthWithBackend("login", idToken);
+        await login(idToken);
       }
       navigate("/");
     } catch (err: unknown) {

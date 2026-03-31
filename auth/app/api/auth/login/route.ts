@@ -24,13 +24,12 @@ export async function POST(request: Request) {
       : typeof body.idToken === "string"
         ? body.idToken
         : null;
-  const role = typeof body.role === "string" ? body.role : null;
 
-  if (!idToken || !role) {
+  if (!idToken) {
     return NextResponse.json(
       {
         error:
-          "Expected JSON body with { token, role } (token = Firebase ID token)",
+          "Expected JSON body with { token } (token = Firebase ID token)",
       },
       { status: 400 },
     );
@@ -70,14 +69,5 @@ export async function POST(request: Request) {
       { status: 404 },
     );
   }
-
-  const storedRole = readStoredRoleFromRow(data, roleColumn);
-  if (storedRole === undefined || storedRole !== role) {
-    return NextResponse.json(
-      { error: "Role does not match stored value" },
-      { status: 403 },
-    );
-  }
-
   return NextResponse.json({ valid: true, uid });
 }

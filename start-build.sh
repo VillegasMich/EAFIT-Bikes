@@ -18,4 +18,7 @@ docker compose -f "$SCRIPT_DIR/geolocalization/docker-compose.yml" up -d --build
 echo "Building and starting Reservations service..."
 docker compose -f "$SCRIPT_DIR/reservations/docker-compose.yml" up -d --build
 
+echo "Building and starting Auth service..."
+docker compose -f "$SCRIPT_DIR/auth/docker-compose.yml" up -d --build
+
 echo "All services built and started."

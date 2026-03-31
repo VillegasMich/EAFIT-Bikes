@@ -27,7 +27,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/events': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
       '/api/auth': {

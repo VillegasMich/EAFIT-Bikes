@@ -3,6 +3,9 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+echo "Stopping Auth service..."
+docker compose -f "$SCRIPT_DIR/auth/docker-compose.yml" down -v
+
 echo "Stopping Reservations service..."
 docker compose -f "$SCRIPT_DIR/reservations/docker-compose.yml" down -v
 

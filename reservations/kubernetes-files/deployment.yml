@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bikes-reservations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bikes-reservations
+  template:
+    metadata:
+      labels:
+        app: bikes-reservations
+    spec:
+      containers:
+        - name: bikes-reservations
+          image: 363234579078.dkr.ecr.us-east-1.amazonaws.com/bikes/reservations:latest
+          
+          env:
+            - name: DATABASE_URL
+              value: postgresql://postgres:postgres@postgres:5432/bikes
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_VHOST
+              value: /
+            - name: RABBITMQ_QUEUE_NAME
+              value: bike_events
+            - name: RABBITMQ_EXCHANGE_NAME
+              value: bike_services
+          
+          ports:
+            - containerPort: 8000
+          
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
